@@ -666,7 +666,7 @@ body {
 .file-format {
     font-family: var(--ui-font);
     font-size: 10px;
-    color: var(--vfd-blue);
+    color: var(--vfd-red);
     opacity: 1;
     text-transform: uppercase;
     margin-left: 10px;
@@ -1124,4 +1124,53 @@ body {
     color: var(--vfd-blue);
     text-shadow: 0 0 15px var(--vfd-blue-dim);
     margin-right: 5px;
+}
+
+/* Style identique à tes autres modales pour la cohérence */
+.custom-modal {
+    display: none;
+    /* Caché par défaut */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.power-alert {
+    background: #1a1a1a;
+    border: 1px solid var(--vfd-blue);
+    box-shadow: 0 0 20px var(--vfd-glow);
+    padding: 30px;
+    text-align: center;
+    border-radius: 4px;
+    min-width: 280px;
+}
+
+.btn-confirm {
+    background: #333;
+    color: var(--vfd-blue);
+    width: 80px;
+    height: 35px;
+    border: 1px solid var(--vfd-blue);
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: #333;
+    color: #fff;
+    width: 80px;
+    height: 35px;
+    border: 1px solid #555;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background: var(--vfd-blue);
+    color: #000;
 }

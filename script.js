@@ -246,16 +246,8 @@ document.getElementById('ab-btn').onclick = () => {
 function isABActive() { return pointA !== null; }
 
 document.getElementById('power-reset-btn').onclick = () => {
-    audio.pause(); audio.src = ""; audio.removeAttribute('src'); audio.volume = 0.02;
-    playlist = []; currentIndex = 0; pointA = null; pointB = null; isMuted = false; isABLocked = false;
-    document.querySelectorAll('.vfd-indicator').forEach(el => el.classList.remove('active', 'vfd-input-blink'));
-    document.getElementById('main-time-display').classList.remove('vfd-blink-pause');
-    const formatDisplay = document.getElementById('file-format-display');
-    if (formatDisplay) formatDisplay.innerText = "";
-    updateDig('t', 0); updateGrid();
-    document.getElementById('tray-front').classList.add('open');
-    showVolumeDisplay();
-    setTimeout(hideVolumeDisplay, 2000);
+    // On affiche simplement la modale personnalisée
+    document.getElementById('power-modal').style.display = 'flex';
 };
 
 document.getElementById('play-btn').onclick = () => {
@@ -692,7 +684,7 @@ ipcRenderer.on('media-control', (event, action) => {
                 updateStatusIcon('pause');
             }
         }
-    } 
+    }
     else if (action === 'next') {
         // On force le passage à la piste suivante directement
         if (isRandom && playlist.length > 1) {
@@ -703,7 +695,7 @@ ipcRenderer.on('media-control', (event, action) => {
         } else if (repeatMode === 2) {
             loadTrack(0);
         }
-    } 
+    }
     else if (action === 'prev') {
         if (audio.currentTime > 3) {
             audio.currentTime = 0;
