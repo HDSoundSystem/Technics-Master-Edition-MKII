@@ -1,6 +1,6 @@
 {
   "name": "technics-master-edition-mkII",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Technics Master Edition MKII",
   "main": "main.js",
   "scripts": {

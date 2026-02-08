@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Technics Master Edition MKII</title>
         <meta name="author" content="Yohann Zaoui">
-        <meta name="keywords"content="Technics, Hi-Res Audio, Audio Player, Mini, HiFi, Touchscreen, Music Player, Web App, flac, mp3, music">
+        <meta name="keywords"
+            content="Technics, Hi-Res Audio, Audio Player, Mini, HiFi, Touchscreen, Music Player, Web App, flac, mp3, music">
         <link rel="icon" type="image/x-icon" href="assets/img/favicon.png">
         <link rel="apple-touch-icon" href="assets/img/favicon.png">
         <link rel="icon" type="image/png" href="assets/img/favicon.png">
@@ -39,7 +40,6 @@
         </div>
 
         <div class="deck-container">
-            
 
             <header class="brand-header">
                 <a href="#" id="vfd-color-trigger" class="invisible-link"
@@ -308,7 +308,23 @@
                 </div>
             </div>
         </div>
-
+        <div id="power-modal" class="custom-modal">
+            <div class="modal-content power-alert">
+                <img src="assets/img/Technics_logo.png" class="main-logo-reset-menu"
+                        alt="Technics">
+                <h3 style="color:var(--vfd-blue); margin-top:0;">POWER OFF</h3>
+                <p
+                    style="color:#a0a0a0; font-size: 14px; letter-spacing: 1px;">Confirm
+                    system reset and clear playlist?</p>
+                <div
+                    style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
+                    <button class="btn btn-confirm"
+                        onclick="location.reload()">YES</button>
+                    <button class="btn btn-cancel"
+                        onclick="document.getElementById('power-modal').style.display='none'">NO</button>
+                </div>
+            </div>
+        </div>
         <script src="script.js"></script>
     </body>
 </html>
