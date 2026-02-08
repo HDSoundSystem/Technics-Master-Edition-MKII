@@ -1,6 +1,5 @@
 :root {
-    --bg-black: #0d0d0d;
-    /* background par défaut*/
+    --bg-black: #000000;
     --deck-gray: #1a1a1b;
     --vfd-blue: #40e0ff;
     --vfd-green: #008000;
@@ -171,7 +170,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid #000;
+    border: 1px solid #000;
     box-sizing: border-box;
     border-top-color: #333;
 }
@@ -833,15 +832,6 @@ body {
     background-color: rgba(255, 255, 255, 0.01);
 }
 
-
-.hatch-logo {
-    font-size: 10px;
-    color: #444;
-    letter-spacing: 2px;
-    font-weight: bold;
-}
-
-
 .hatch-texture {
     width: 100%;
     height: 100%;
@@ -924,7 +914,7 @@ body {
     width: 100%;
     height: 95px;
     background: #0a0a0a;
-    border: 2px solid #000;
+    border: 1px solid #000;
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -940,7 +930,7 @@ body {
     width: 100%;
     height: 100%;
     background: linear-gradient(180deg, #1a1a1b 0%, #151516 100%);
-    border: 2px solid #000;
+    border: 1px solid #000;
     border-top-color: #333;
     box-sizing: border-box;
     z-index: 20;
