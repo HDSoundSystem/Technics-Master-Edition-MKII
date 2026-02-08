@@ -1174,3 +1174,11 @@ body {
     background: var(--vfd-blue);
     color: #000;
 }
+
+.main-logo-reset-menu {
+    height: 23px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 15px;
+}
