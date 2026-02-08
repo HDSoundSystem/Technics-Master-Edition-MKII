@@ -15,6 +15,7 @@ let bassLevel = 0;
 let trebleLevel = 0;
 let userPaused = false;
 let isABLocked = false;
+let isDisplayLocked = false;
 const vfdColors = ['#ffffff', '#a0a0a0', '#DBE9FF', '#B5B5B5'];
 
 // CORRECTION 1 : Variable pour empêcher la double connexion audio
@@ -272,22 +273,24 @@ function updateDig(prefix, val) {
 }
 
 function updateTimeDisplay() {
+    // Si l'affichage est verrouillé (pendant un reset ou un réglage), on sort
+    if (isDisplayLocked) return;
+
     const timeLabel = document.getElementById('time-label');
     const mainTimeDisplay = document.getElementById('main-time-display');
 
-    if (timeLabel.innerText === "VOLUME" || timeLabel.innerText === "MUTE" || timeLabel.innerText === "VU SENSE" || timeLabel.innerText === "BASS" ||
-        timeLabel.innerText === "TREBLE" || isPeakSearching) return;
+    // Sécurité pour les autres modes
+    if (["VOLUME", "MUTE", "VU SENSE", "BASS", "TREBLE"].includes(timeLabel.innerText) || isPeakSearching) return;
 
     let d = timeMode === 0 ? audio.currentTime : (audio.duration || 0) - audio.currentTime;
     const mins = Math.floor(d / 60).toString().padStart(2, '0');
     const secs = Math.floor(d % 60).toString().padStart(2, '0');
 
-    document.getElementById('m-d1').innerText = mins[mins.length - 2] || "0";
-    document.getElementById('m-d2').innerText = mins[mins.length - 1] || "0";
-    document.getElementById('s-d1').innerText = secs[secs.length - 2] || "0";
-    document.getElementById('s-d2').innerText = secs[secs.length - 1] || "0";
+    document.getElementById('m-d1').innerText = mins[0];
+    document.getElementById('m-d2').innerText = mins[1];
+    document.getElementById('s-d1').innerText = secs[0];
+    document.getElementById('s-d2').innerText = secs[1];
 
-    // Ajouter une classe pour afficher le "-"
     if (timeMode === 1) {
         mainTimeDisplay.classList.add('time-inverse');
     } else {
@@ -636,15 +639,38 @@ document.getElementById('vfd-color-trigger').onclick = (e) => {
 };
 
 function resetToneDefault() {
+    // 1. Reset des filtres
     bassLevel = 0;
     trebleLevel = 0;
+    if (bassFilter) bassFilter.gain.value = 0;
+    if (trebleFilter) trebleFilter.gain.value = 0;
 
-    // Application aux filtres audio
-    if (bassFilter) bassFilter.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
-    if (trebleFilter) trebleFilter.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
+    // 2. Verrouillage de l'affichage
+    isDisplayLocked = true;
+    
+    const timeLabel = document.getElementById('time-label');
+    const timeSep = document.getElementById('time-sep');
 
-    // Affichage VFD temporaire
-    showToneDisplay("DEFAULT", 0);
+    // Affichage du message
+    timeLabel.innerText = "TONE RESET";
+    timeSep.style.opacity = "0"; // Cache le ":"
+    
+    // Efface les chiffres
+    document.getElementById('m-d1').innerText = " ";
+    document.getElementById('m-d2').innerText = " ";
+    document.getElementById('s-d1').innerText = " ";
+    document.getElementById('s-d2').innerText = " ";
+
+    // 3. Déverrouillage après 1500ms
+    setTimeout(() => {
+        isDisplayLocked = false; // TRÈS IMPORTANT : On libère le verrou
+        
+        // Remet le bon label selon le mode de temps
+        timeLabel.innerText = (timeMode === 0) ? "Min : Sec" : "- Min : Sec";
+        timeSep.style.opacity = "1"; // Rallume le ":"
+        
+        updateTimeDisplay(); // Force la remise à jour immédiate des chiffres
+    }, 1500);
 }
 
 function changeBackgroundColor(color) {
