@@ -1,7 +1,7 @@
 const audio = new Audio();
 audio.crossOrigin = "anonymous";
 let playlist = [], currentIndex = 0;
-let currentArt = "img/Technics_cover.png", currentMeta = "Technics - Master - Edition MKII";
+let currentArt = "assets/img/Technics_cover.png", currentMeta = "Technics - Master - Edition MKII";
 let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
 let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
