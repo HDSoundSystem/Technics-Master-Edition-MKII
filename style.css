@@ -14,8 +14,6 @@
     --text-gold: #7a6a0c;
     --text-brown: #9F7E69;
     --text-white: #ffffff;
-    --border-color: #BD9448;
-    --largeur: 10px;
     --ui-font: 'Segoe UI', Tahoma, sans-serif;
     --digital-font: 'DS-Digital', sans-serif;
     --brushed-metal: conic-gradient(from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg);
@@ -50,55 +48,6 @@ body {
     border-top: 1px solid rgb(65, 65, 65);
     border-bottom: none;
 }
-
-/* Pseudo-éléments pour les bordures dorées brillantes */
-.deck-container::before,
-.deck-container::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: var(--largeur);
-    /* Utilise votre variable existante */
-    height: 100%;
-    z-index: 0;
-    /* Passe derrière le contenu du deck */
-
-    /* Dégradé Or brossé avec opacité réglée */
-    background: linear-gradient(to bottom,
-            rgba(140, 109, 53, 0.7) 0%,
-            rgba(189, 148, 72, 0.85) 25%,
-            rgba(247, 226, 180, 0.95) 50%,
-            /* Point de brillance */
-            rgba(189, 148, 72, 0.85) 75%,
-            rgba(140, 109, 53, 0.7) 100%);
-
-    /* Effet de métal poli doux */
-    filter: blur(0.4px);
-    transition: filter 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Positionnement à Gauche */
-.deck-container::before {
-    left: 0;
-    border-right: 1px solid rgba(0, 0, 0, 0.3);
-    box-shadow: inset -1px 0 3px rgba(255, 255, 255, 0.1);
-}
-
-/* Positionnement à Droite */
-.deck-container::after {
-    right: 0;
-    border-left: 1px solid rgba(0, 0, 0, 0.3);
-    box-shadow: inset 1px 0 3px rgba(255, 255, 255, 0.1);
-}
-
-/* --- OPTIONNEL : EFFET D'ILLUMINATION AU VOLUME --- */
-/* Si vous ajoutez cette classe au container via JS quand le son monte */
-.deck-container.volume-glow::before,
-.deck-container.volume-glow::after {
-    filter: brightness(1.3) blur(1px);
-    box-shadow: 0 0 15px rgba(189, 148, 72, 0.6);
-}
-
 
 .brand-header {
     display: flex;
