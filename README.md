@@ -3,7 +3,7 @@
 A vintage-inspired, high-fidelity web audio player that recreates the premium experience of classic Technics audio equipment with modern web technologies.
 
 ![Technics Master Edition MKII](img/Technics_cover.png)
-<img width="1913" height="886" alt="1" src="https://github.com/user-attachments/assets/3fb88cd5-01b0-4595-ac9a-29d8d2eb549b" />
+<img width="1875" height="797" alt="1" src="https://github.com/user-attachments/assets/f9091b9e-b6fc-481c-b5d8-74f2185ccff5" />
 
 ## Overview
 
@@ -256,5 +256,6 @@ This project is provided as-is for educational and personal use. Technics is a t
 For issues, suggestions, or contributions, please contact the author or submit feedback through the application interface.
 
 -----
-<img width="1890" height="823" alt="3" src="https://github.com/user-attachments/assets/012a7bee-673b-4478-8884-014163dd3c6b" />
+<img width="1878" height="805" alt="2" src="https://github.com/user-attachments/assets/194cebcf-6b3b-468f-be95-13d678f80dca" />
+
 **Enjoy your music with vintage style and modern fidelity! 🎵**
