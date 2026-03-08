@@ -370,16 +370,9 @@ body {
     height: 50px;
     width: 100%;
     /* Prend toute la largeur de power-section (110px) */
-    color: var(--vfd-red) !important;
     /* Toujours blanc */
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
     /* Effet lumineux */
-}
-
-#power-reset-btn i {
-    color: var(--vfd-red) !important;
-    /* Icône toujours blanche */
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 #stop-btn, #eject-btn {
