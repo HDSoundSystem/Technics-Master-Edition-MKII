@@ -16,7 +16,7 @@ let trebleLevel = 0;
 let userPaused = false;
 let isABLocked = false;
 let isDisplayLocked = false;
-const vfdColors = ['#ffffff', '#a0a0a0', '#DBE9FF', '#B5B5B5'];
+
 
 // CORRECTION 1 : Variable pour empêcher la double connexion audio
 let isAudioConnected = false;
@@ -603,32 +603,7 @@ function checkLock(e) {
     return false;
 }
 
-let currentColorIndex = 0;
 
-function setGlobalVFDColor(color) {
-    const root = document.documentElement;
-    root.style.setProperty('--vfd-blue', color);
-    root.style.setProperty('--vfd-glow', color + '66');
-    localStorage.setItem('technics-vfd-color', color);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    const savedColor = localStorage.getItem('technics-vfd-color');
-    if (savedColor) {
-        setGlobalVFDColor(savedColor);
-        currentColorIndex = vfdColors.indexOf(savedColor);
-        if (currentColorIndex === -1) currentColorIndex = 0;
-    }
-});
-
-const colorTrigger = document.getElementById('vfd-color-trigger');
-if(colorTrigger) {
-    colorTrigger.onclick = (e) => {
-        e.preventDefault();
-        currentColorIndex = (currentColorIndex + 1) % vfdColors.length;
-        setGlobalVFDColor(vfdColors[currentColorIndex]);
-    };
-}
 
 function resetToneDefault() {
     bassLevel = 0;
@@ -656,17 +631,3 @@ function resetToneDefault() {
     }, 1500);
 }
 
-function changeBackgroundColor(color) {
-    document.body.style.background = color;
-    document.body.style.backgroundImage = 'none';
-    localStorage.setItem('user-bg-color', color);
-}
-
-window.addEventListener('load', () => {
-    const savedBgColor = localStorage.getItem('user-bg-color');
-    const picker = document.getElementById('bg-color-picker');
-    if (savedBgColor) {
-        changeBackgroundColor(savedBgColor);
-        if(picker) picker.value = savedBgColor;
-    }
-});
