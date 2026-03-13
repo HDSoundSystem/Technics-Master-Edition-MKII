@@ -68,13 +68,20 @@ const volUp = document.getElementById('vol-up-btn');
 const volDown = document.getElementById('vol-down-btn');
 const muteBtn = document.getElementById('mute-btn');
 
-[volUp, volDown].forEach(btn => {
-    btn.onmouseenter = showVolumeDisplay;
-    btn.onmouseleave = () => {
-        stopVolRepeat();
-        hideVolumeDisplay();
-    };
-});
+if(volUp && volDown) {
+    [volUp, volDown].forEach(btn => {
+        btn.onmouseenter = showVolumeDisplay;
+        btn.onmouseleave = () => {
+            stopVolRepeat();
+            hideVolumeDisplay();
+        };
+    });
+
+    volUp.onmousedown = () => startVolRepeat(1);
+    volUp.onmouseup = stopVolRepeat;
+    volDown.onmousedown = () => startVolRepeat(-1);
+    volDown.onmouseup = stopVolRepeat;
+}
 
 function startVolRepeat(dir) {
     stopVolRepeat();
@@ -96,34 +103,29 @@ function stopVolRepeat() {
     }
 }
 
-volUp.onmousedown = () => startVolRepeat(1);
-volUp.onmouseup = stopVolRepeat;
-volDown.onmousedown = () => startVolRepeat(-1);
-volDown.onmouseup = stopVolRepeat;
-
-muteBtn.onclick = () => {
-    if (!isMuted) {
-        preMuteVolume = audio.volume;
-        audio.volume = 0;
-        isMuted = true;
-        showVolumeDisplay();
-    } else {
-        audio.volume = preMuteVolume;
-        isMuted = false;
-        hideVolumeDisplay();
-    }
-};
+if(muteBtn) {
+    muteBtn.onclick = () => {
+        if (!isMuted) {
+            preMuteVolume = audio.volume;
+            audio.volume = 0;
+            isMuted = true;
+            showVolumeDisplay();
+        } else {
+            audio.volume = preMuteVolume;
+            isMuted = false;
+            hideVolumeDisplay();
+        }
+    };
+}
 
 function startSearch(dir) {
     if (isABActive() || checkLock()) return;
     if (!playlist.length || isPeakSearching) return;
 
     if (dir > 0) {
-        // FWD : Accélération avec son
         audio.playbackRate = 4.0;
         if (audio.paused) audio.play();
     } else {
-        // REW : Sauts en arrière (pas de son possible)
         audio.muted = true;
         searchInterval = setInterval(() => {
             audio.currentTime = Math.max(0, audio.currentTime - 2);
@@ -172,9 +174,11 @@ document.getElementById('peak-btn').onclick = async () => {
     for (let i = 0; i < 50; i++) {
         audio.currentTime = i * step;
         await new Promise(r => setTimeout(r, 40));
-        analyzer.getByteFrequencyData(dataArray);
-        let currentMax = Math.max(...dataArray);
-        if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
+        if(analyzer) {
+            analyzer.getByteFrequencyData(dataArray);
+            let currentMax = Math.max(...dataArray);
+            if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
+        }
     }
     audio.currentTime = peakTime;
     document.getElementById('main-time-display').classList.remove('vfd-input-blink');
@@ -198,25 +202,17 @@ document.getElementById('peak-btn').onclick = async () => {
 document.getElementById('vu-btn').onclick = () => {
     isVUOn = !isVUOn;
     const labels = [document.getElementById('lbl-L'), document.getElementById('lbl-R')];
-    const scale = document.querySelector('.vu-scale'); // Cible l'élément d'échelle
+    const scale = document.querySelector('.vu-scale');
 
     if (!isVUOn) {
-        // Désactiver les labels L/R
-        labels.forEach(l => l.className = 'vu-label');
-
-        // Cacher l'échelle (graduation)
+        labels.forEach(l => l && (l.className = 'vu-label'));
         if (scale) scale.style.opacity = "0";
-
-        // Éteindre tous les segments
         ['meter-L', 'meter-R'].forEach(id => {
             const el = document.getElementById(id);
             for (let i = 0; i < 40; i++) el.children[i].className = 'meter-segment';
         });
     } else {
-        // Activer les labels L/R
-        labels.forEach(l => l.className = 'vu-label on');
-
-        // Afficher l'échelle
+        labels.forEach(l => l && (l.className = 'vu-label on'));
         if (scale) scale.style.opacity = "1";
     }
 };
@@ -247,7 +243,6 @@ document.getElementById('ab-btn').onclick = () => {
 function isABActive() { return pointA !== null; }
 
 document.getElementById('power-reset-btn').onclick = () => {
-    // On affiche simplement la modale personnalisée
     document.getElementById('power-modal').style.display = 'flex';
 };
 
@@ -268,18 +263,16 @@ document.getElementById('stop-btn').onclick = () => {
 
 function updateDig(prefix, val) {
     const s = Math.floor(Math.abs(val)).toString().padStart(2, '0');
-    document.getElementById(`${prefix}-d1`).innerText = s[s.length - 2] || "0";
-    document.getElementById(`${prefix}-d2`).innerText = s[s.length - 1] || "0";
+    const d1 = document.getElementById(`${prefix}-d1`);
+    const d2 = document.getElementById(`${prefix}-d2`);
+    if(d1) d1.innerText = s[s.length - 2] || "0";
+    if(d2) d2.innerText = s[s.length - 1] || "0";
 }
 
 function updateTimeDisplay() {
-    // Si l'affichage est verrouillé (pendant un reset ou un réglage), on sort
     if (isDisplayLocked) return;
-
     const timeLabel = document.getElementById('time-label');
     const mainTimeDisplay = document.getElementById('main-time-display');
-
-    // Sécurité pour les autres modes
     if (["VOLUME", "MUTE", "VU SENSE", "BASS", "TREBLE"].includes(timeLabel.innerText) || isPeakSearching) return;
 
     let d = timeMode === 0 ? audio.currentTime : (audio.duration || 0) - audio.currentTime;
@@ -291,11 +284,8 @@ function updateTimeDisplay() {
     document.getElementById('s-d1').innerText = secs[0];
     document.getElementById('s-d2').innerText = secs[1];
 
-    if (timeMode === 1) {
-        mainTimeDisplay.classList.add('time-inverse');
-    } else {
-        mainTimeDisplay.classList.remove('time-inverse');
-    }
+    if (timeMode === 1) mainTimeDisplay.classList.add('time-inverse');
+    else mainTimeDisplay.classList.remove('time-inverse');
 }
 
 function updateGrid() {
@@ -412,7 +402,7 @@ function extractMetadata(file) {
             if (p) {
                 let b64 = ""; for (let i = 0; i < p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
                 currentArt = `data:${p.format};base64,${window.btoa(b64)}`;
-            } else currentArt = "img/Technics_cover.png";
+            } else currentArt = "assets/img/Technics_cover.png";
             updateMediaSession();
         }
     });
@@ -451,7 +441,6 @@ document.getElementById('prev-btn').onclick = () => {
     loadTrack(currentIndex - 1);
 };
 
-// CORRECTION 2 : Correction de l'ID du tiroir pour correspondre au HTML
 document.getElementById('eject-btn').onclick = () => document.getElementById('tray-front').classList.toggle('open');
 
 document.getElementById('random-btn').onclick = () => {
@@ -477,7 +466,6 @@ function openArt() {
     document.getElementById('art-modal').style.display = 'flex';
 }
 
-// CORRECTION 3 : Vérification isAudioConnected pour éviter l'erreur de re-connexion
 function setupAudio() {
     if (audioCtx && audioCtx.state === "suspended") { audioCtx.resume(); return; }
     if (isAudioConnected) return;
@@ -514,17 +502,14 @@ function renderVU() {
     analyzer.getByteFrequencyData(dataArray);
     ['meter-L', 'meter-R'].forEach((id, idx) => {
         const el = document.getElementById(id);
+        if(!el) return;
         let rawVal = dataArray[idx + 2] * vuMultiplier;
         const val = Math.floor((rawVal / 255) * 40);
         for (let i = 0; i < 40; i++) {
             if (i < val) {
-                if (i >= 30) {
-                    el.children[i].className = 'meter-segment on-red';
-                } else if (i >= 20) {
-                    el.children[i].className = 'meter-segment on-orange';
-                } else {
-                    el.children[i].className = 'meter-segment on-blue';
-                }
+                if (i >= 30) el.children[i].className = 'meter-segment on-red';
+                else if (i >= 20) el.children[i].className = 'meter-segment on-orange';
+                else el.children[i].className = 'meter-segment on-blue';
             } else {
                 el.children[i].className = 'meter-segment';
             }
@@ -534,7 +519,9 @@ function renderVU() {
 
 ['meter-L', 'meter-R'].forEach(id => {
     const el = document.getElementById(id);
-    for (let i = 0; i < 40; i++) el.appendChild(document.createElement('div')).className = 'meter-segment';
+    if(el) {
+        for (let i = 0; i < 40; i++) el.appendChild(document.createElement('div')).className = 'meter-segment';
+    }
 });
 
 audio.volume = 0.02;
@@ -565,8 +552,10 @@ function startVUTimeout() {
 
 function toggleVUHatch() {
     const hatch = document.getElementById('vu-hatch-block');
-    hatch.classList.toggle('hatch-open');
-    hatch.classList.toggle('hatch-closed');
+    if(hatch) {
+        hatch.classList.toggle('hatch-open');
+        hatch.classList.toggle('hatch-closed');
+    }
 }
 
 function adjustBass(change) {
@@ -598,21 +587,21 @@ function showToneDisplay(label, value) {
 
 function toggleToneHatch() {
     const hatch = document.getElementById('tone-hatch-block');
-    hatch.classList.toggle('hatch-open');
+    if(hatch) hatch.classList.toggle('hatch-open');
 }
 
 function checkLock(e) {
     if (isABLocked) {
         const lockIndicator = document.getElementById('vfd-ab-lock');
-        lockIndicator.classList.add('vfd-input-blink');
-        setTimeout(() => lockIndicator.classList.remove('vfd-input-blink'), 500);
+        if(lockIndicator) {
+            lockIndicator.classList.add('vfd-input-blink');
+            setTimeout(() => lockIndicator.classList.remove('vfd-input-blink'), 500);
+        }
         if (e) e.stopPropagation();
         return true;
     }
     return false;
 }
-
-
 
 let currentColorIndex = 0;
 
@@ -632,103 +621,52 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-document.getElementById('vfd-color-trigger').onclick = (e) => {
-    e.preventDefault();
-    currentColorIndex = (currentColorIndex + 1) % vfdColors.length;
-    setGlobalVFDColor(vfdColors[currentColorIndex]);
-};
+const colorTrigger = document.getElementById('vfd-color-trigger');
+if(colorTrigger) {
+    colorTrigger.onclick = (e) => {
+        e.preventDefault();
+        currentColorIndex = (currentColorIndex + 1) % vfdColors.length;
+        setGlobalVFDColor(vfdColors[currentColorIndex]);
+    };
+}
 
 function resetToneDefault() {
-    // 1. Reset des filtres
     bassLevel = 0;
     trebleLevel = 0;
     if (bassFilter) bassFilter.gain.value = 0;
     if (trebleFilter) trebleFilter.gain.value = 0;
 
-    // 2. Verrouillage de l'affichage
     isDisplayLocked = true;
-    
     const timeLabel = document.getElementById('time-label');
     const timeSep = document.getElementById('time-sep');
 
-    // Affichage du message
     timeLabel.innerText = "TONE RESET";
-    timeSep.style.opacity = "0"; // Cache le ":"
+    timeSep.style.opacity = "0";
     
-    // Efface les chiffres
     document.getElementById('m-d1').innerText = " ";
     document.getElementById('m-d2').innerText = " ";
     document.getElementById('s-d1').innerText = " ";
     document.getElementById('s-d2').innerText = " ";
 
-    // 3. Déverrouillage après 1500ms
     setTimeout(() => {
-        isDisplayLocked = false; // TRÈS IMPORTANT : On libère le verrou
-        
-        // Remet le bon label selon le mode de temps
+        isDisplayLocked = false;
         timeLabel.innerText = (timeMode === 0) ? "Min : Sec" : "- Min : Sec";
-        timeSep.style.opacity = "1"; // Rallume le ":"
-        
-        updateTimeDisplay(); // Force la remise à jour immédiate des chiffres
+        timeSep.style.opacity = "1";
+        updateTimeDisplay();
     }, 1500);
 }
 
 function changeBackgroundColor(color) {
-    // Applique la couleur au fond de la page
     document.body.style.background = color;
-
-    // Si vous avez une image de fond (métal brossé), on la retire pour voir la couleur
     document.body.style.backgroundImage = 'none';
-
-    // Optionnel : Sauvegarder la préférence (comme demandé dans vos instructions)
     localStorage.setItem('user-bg-color', color);
 }
 
-// Au chargement de la page, restaurer la couleur si elle existe
 window.addEventListener('load', () => {
-    const savedColor = localStorage.getItem('user-bg-color');
-    if (savedColor) {
-        changeBackgroundColor(savedColor);
-        document.getElementById('bg-color-picker').value = savedColor;
-    }
-});
-
-const { ipcRenderer } = require('electron');
-
-ipcRenderer.on('media-control', (event, action) => {
-    // On vérifie si l'appareil est allumé
-    if (!isPoweredOn) return;
-
-    if (action === 'play-pause') {
-        if (playlist.length > 0) {
-            initEngine();
-            if (audio.paused) {
-                audio.play();
-                updateStatusIcon('play');
-            } else {
-                audio.pause();
-                updateStatusIcon('pause');
-            }
-        }
-    }
-    else if (action === 'next') {
-        // On force le passage à la piste suivante directement
-        if (isRandom && playlist.length > 1) {
-            let n; do { n = Math.floor(Math.random() * playlist.length); } while (n === currentIndex);
-            loadTrack(n);
-        } else if (currentIndex < playlist.length - 1) {
-            loadTrack(currentIndex + 1);
-        } else if (repeatMode === 2) {
-            loadTrack(0);
-        }
-    }
-    else if (action === 'prev') {
-        if (audio.currentTime > 3) {
-            audio.currentTime = 0;
-        } else if (currentIndex > 0) {
-            loadTrack(currentIndex - 1);
-        } else if (repeatMode === 2) {
-            loadTrack(playlist.length - 1);
-        }
+    const savedBgColor = localStorage.getItem('user-bg-color');
+    const picker = document.getElementById('bg-color-picker');
+    if (savedBgColor) {
+        changeBackgroundColor(savedBgColor);
+        if(picker) picker.value = savedBgColor;
     }
 });
