@@ -4,21 +4,21 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Technics Master Edition MKII</title>
-        <meta name="author" content="Yohann Zaoui">
-        <meta name="keywords"
-            content="Technics, Hi-Res Audio, Audio Player, Mini, HiFi, Touchscreen, Music Player, Web App, flac, mp3, music">
-        <link rel="icon" type="image/x-icon" href="assets/img/favicon.png">
-        <link rel="apple-touch-icon" href="assets/img/favicon.png">
-        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+        <meta name="author" content="Yohann Zaoui (HDSoundSystem)">
+        <link rel="icon" type="image/x-icon" href="img/favicon.png">
+        <link rel="apple-touch-icon" href="img/favicon.png">
         <link rel="manifest" href="manifest.json">
         <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="assets/fontawesome7/css/all.min.css">
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+            integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     </head>
     <body>
 
+        <!-- Modal album art -->
         <div id="art-modal" onclick="this.style.display='none'">
             <div class="modal-content" onclick="event.stopPropagation()">
                 <img id="art-image" src="img/favicon.png" alt="Album Art">
@@ -26,12 +26,10 @@
             </div>
         </div>
 
+        <!-- Modal playlist -->
         <div id="playlist-modal" onclick="this.style.display='none'">
-            <div class="modal-content list-content"
-                onclick="event.stopPropagation()">
-                <h3
-                    style="color:var(--vfd-blue); margin-top:0; letter-spacing:2px;">TRACK
-                    LIST</h3>
+            <div class="modal-content list-content" onclick="event.stopPropagation()">
+                <h3 style="color:var(--vfd-blue); margin-top:0; letter-spacing:2px;">TRACK LIST</h3>
                 <div id="track-list-container"></div>
                 <button class="btn"
                     style="margin-top:20px; height:35px; width:100px; margin-left:auto; margin-right:auto;"
@@ -39,145 +37,138 @@
             </div>
         </div>
 
+        <!-- Modal power -->
+        <div id="power-modal" class="custom-modal">
+            <div class="modal-content power-alert">
+                <img src="img/technics_logo2.png" class="main-logo-reset-menu" alt="Technics">
+                <h3 style="color:var(--vfd-blue); margin-top:0;">POWER OFF</h3>
+                <p style="color:#a0a0a0; font-size:14px; letter-spacing:1px;">Confirm system reset and clear playlist?</p>
+                <div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
+                    <button class="btn btn-confirm" onclick="location.reload()">YES</button>
+                    <button class="btn btn-cancel" onclick="document.getElementById('power-modal').style.display='none'">NO</button>
+                </div>
+            </div>
+        </div>
+
         <div class="deck-container">
 
+            <!-- HEADER -->
             <header class="brand-header">
-                <a href="#" id="vfd-color-trigger" class="invisible-link"
-                    title="Change Display Color">
-                    <img src="assets/img/Technics_logo.png" class="main-logo"
-                        alt="Technics">
+                <a href="#" id="vfd-color-trigger" class="invisible-link" title="Change Display Color">
+                    <img src="img/technics_logo2.png" class="main-logo" alt="Technics">
                 </a>
-                <div class="model-name">Master Edition MKII</div>
+                <div><img src="img/classAA.png" alt="Technics"></div>
             </header>
 
-            <div class="central-display-section">
-                <div class="tray-outer-slot">
-                    <div id="tray-front" class="tray-mechanism">
-                        <img src="assets/img/mash_logo_t.png" alt="MASH Logo"
-                            class="mash-logo-tray">
-                    </div>
-                    <div
-                        style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
-                        <input type="file" id="file-input" multiple
-                            style="display:none">
-                        <label for="file-input"
-                            style="color:#a0a0a0; cursor:pointer; font-weight:bold; letter-spacing:3px;">-
-                            SELECT TRACKS -</label>
-                    </div>
-                </div>
+            <!-- RANGÉE PRINCIPALE : [Power+Aux] | [Tiroir] | [Écran VFD] | [Search+Volume] -->
+            <div class="main-row">
 
-                <div class="display-with-controls">
-                    <div class="power-section">
+                <!-- Col gauche : Power + Time/VU -->
+                <div class="left-column">
+                    <div class="power-block">
                         <span class="upper-label">POWER</span>
                         <button class="btn" id="power-reset-btn"></button>
                     </div>
-
-                    <div class="controls-left-stack">
+                    <div class="aux-buttons">
                         <button class="btn" id="time-btn">Time Mode</button>
                         <button class="btn" id="vu-btn">VU Meter</button>
                     </div>
+                </div>
 
-                    <section class="display-panel">
-                        <div class="vfd-main-row">
-                            <div class="vfd-col-track">
-                                <span class="label-vfd clickable"
-                                    id="track-label"
-                                    onclick="openArt()">Track</span>
-                                <div class="digital-counter">
-                                    <span id="t-d1" class="digit">0</span><span
-                                        id="t-d2" class="digit">0</span>
-                                    <span id="file-format-display"
-                                        class="file-format"
-                                        onclick="openArt()">---</span>
-                                </div>
-                            </div>
+                <!-- Tiroir CD (vertical, à droite du bloc power) -->
+                <div class="tray-outer-slot">
+                    <div id="tray-front" class="tray-mechanism">
+                        <img src="img/mash_logo_t.png" alt="MASH Logo" class="mash-logo-tray">
+                    </div>
+                    <div class="tray-file-label">
+                        <input type="file" id="file-input" multiple style="display:none">
+                        <label for="file-input" class="tray-select-label">— SELECT TRACKS —</label>
+                    </div>
+                </div>
 
-                            <div class="vfd-col-indicators">
-                                <div id="vfd-random"
-                                    class="vfd-indicator">Random</div>
-                                <div id="vfd-repeat-1"
-                                    class="vfd-indicator">Repeat 1</div>
-                                <div id="vfd-repeat-all"
-                                    class="vfd-indicator">Repeat All</div>
-                                <div id="vfd-ab" class="vfd-indicator">A-B</div>
-                                <div id="vfd-ab-lock" class="vfd-indicator">A-B
-                                    LOCK</div>
-                            </div>
-
-                            <div class="vfd-col-time">
-                                <span class="label-vfd" id="time-label">Min :
-                                    Sec</span>
-                                <div class="digital-counter"
-                                    id="main-time-display">
-                                    <span id="m-d1" class="digit">0</span><span
-                                        id="m-d2" class="digit">0</span>
-                                    <span class="time-separator"
-                                        id="time-sep">:</span>
-                                    <span id="s-d1" class="digit">0</span><span
-                                        id="s-d2" class="digit">0</span>
-                                </div>
+                <!-- Écran VFD (à droite du tiroir) -->
+                <section class="display-panel">
+                    <div class="vfd-main-row">
+                        <div class="vfd-col-track">
+                            <span class="label-vfd clickable" id="track-label" onclick="openArt()">Track</span>
+                            <div class="digital-counter">
+                                <span id="t-d1" class="digit">0</span><span id="t-d2" class="digit">0</span>
+                                <span id="file-format-display" class="file-format" onclick="openArt()">---</span>
                             </div>
                         </div>
-
-                        <div class="track-grid" onclick="openPlaylist()"
-                            style="cursor:pointer">
-                            <div id="grid-numbers-wrapper"
-                                style="display: flex; gap: 10px; align-items: center;"></div>
-                            <div id="over-arrow" class="arrow-indicator">▶</div>
+                        <div class="vfd-col-indicators">
+                            <div id="vfd-random" class="vfd-indicator">Random</div>
+                            <div id="vfd-repeat-1" class="vfd-indicator">Repeat 1</div>
+                            <div id="vfd-repeat-all" class="vfd-indicator">Repeat All</div>
+                            <div id="vfd-ab" class="vfd-indicator">A-B</div>
+                            <div id="vfd-ab-lock" class="vfd-indicator">A-B LOCK</div>
                         </div>
+                        <div class="vfd-col-time">
+                            <span class="label-vfd" id="time-label">Min : Sec</span>
+                            <div class="digital-counter" id="main-time-display">
+                                <span id="m-d1" class="digit">0</span><span id="m-d2" class="digit">0</span>
+                                <span class="time-separator" id="time-sep">:</span>
+                                <span id="s-d1" class="digit">0</span><span id="s-d2" class="digit">0</span>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="vu-meters" id="vu-meters-container">
-                            <div class="vu-row"><span class="vu-label on"
-                                    id="lbl-L">L</span><div
-                                    class="meter-container"
-                                    id="meter-L"></div></div>
-                            <div class="vu-row"><span class="vu-label on"
-                                    id="lbl-R">R</span><div
-                                    class="meter-container"
-                                    id="meter-R"></div></div>
+                    <!-- Grille pistes 1-20 -->
+                    <div class="track-grid" onclick="openPlaylist()" style="cursor:pointer">
+                        <div id="grid-numbers-wrapper" style="display:flex; gap:10px; align-items:center;"></div>
+                        <div id="over-arrow" class="arrow-indicator">▶</div>
+                    </div>
+
+                    <!-- VU Mètres -->
+                    <div class="vu-meters" id="vu-meters-container">
+                        <div class="vu-row">
+                            <span class="vu-label on" id="lbl-L">L</span>
+                            <div class="meter-container" id="meter-L"></div>
+                        </div>
+                        <div class="vu-row">
+                            <span class="vu-label on" id="lbl-R">R</span>
+                            <div class="meter-container" id="meter-R"></div>
                         </div>
                         <div class="vu-scale">
                             <span class="vu-scale-mark">-40</span>
                             <span class="vu-scale-mark">-30</span>
                             <span class="vu-scale-mark">-20</span>
                             <span class="vu-scale-mark">-10</span>
-                            <span class="vu-scale-mark"
-                                style="color: orange;">-6</span>
-                            <span class="vu-scale-mark"
-                                style="color: orange;">-3</span>
-                            <span class="vu-scale-mark"
-                                style="color: red;">0</span>
-                            <span class="vu-scale-mark"
-                                style="color: red;">+3</span>
+                            <span class="vu-scale-mark" style="color:orange;">-6</span>
+                            <span class="vu-scale-mark" style="color:orange;">-3</span>
+                            <span class="vu-scale-mark" style="color:red;">0</span>
+                            <span class="vu-scale-mark" style="color:red;">+3</span>
                         </div>
+                    </div>
+                </section>
 
-                    </section>
-
-                    <div class="controls-right-stack">
-                        <div class="right-buttons-grid">
-                            <span class="volume-label">SEARCH</span>
-                            <button class="btn" id="rew-btn">◀◀</button>
-                            <button class="btn" id="fwd-btn">▶▶</button>
-                            <button class="btn" id="minus-10-btn">- 10s</button>
-                            <button class="btn" id="plus-10-btn">+ 10s</button>
-                            <button class="btn" id="random-btn">Random</button>
-                            <button class="btn" id="repeat-btn">Repeat</button>
-                            <button class="btn" id="ab-btn">A - B</button>
-                            <button class="btn" id="peak-btn">Peak</button>
-                        </div>
-                        <div class="volume-controls">
-                            <span class="volume-label">VOLUME</span>
-                            <button class="btn" id="vol-down-btn"><i
-                                    class="fa-solid fa-volume-low"></i></button>
-                            <button class="btn" id="mute-btn"><i
-                                    class="fa-solid fa-volume-xmark"></i></button>
-                            <button class="btn" id="vol-up-btn"><i
-                                    class="fa-solid fa-volume-high"></i></button>
-                        </div>
-
+                <!-- Col droite : Search + Volume -->
+                <div class="right-column">
+                    <div class="right-buttons-grid">
+                        <span class="volume-label">SEARCH</span>
+                        <button class="btn" id="rew-btn">◀◀</button>
+                        <button class="btn" id="fwd-btn">▶▶</button>
+                        <button class="btn" id="minus-10-btn">- 10s</button>
+                        <button class="btn" id="plus-10-btn">+ 10s</button>
+                        <button class="btn" id="random-btn">Random</button>
+                        <button class="btn" id="repeat-btn">Repeat</button>
+                        <button class="btn" id="ab-btn">A - B</button>
+                        <button class="btn" id="peak-btn">Peak</button>
+                    </div>
+                    <div class="volume-controls">
+                        <span class="volume-label">VOLUME</span>
+                        <button class="btn" id="vol-down-btn"><i class="fa-solid fa-volume-low"></i></button>
+                        <button class="btn" id="mute-btn"><i class="fa-solid fa-volume-xmark"></i></button>
+                        <button class="btn" id="vol-up-btn"><i class="fa-solid fa-volume-high"></i></button>
                     </div>
                 </div>
 
+            </div><!-- fin .main-row -->
+
+            <!-- RANGÉE BASSE : Grille 1-10 + Transport — alignés sous l'écran VFD -->
+            <div class="bottom-controls-row">
+
+                <!-- Grille numérique 1–10 -->
                 <div class="numeric-grid">
                     <button class="btn" onclick="handleNumKey(1)">1</button>
                     <button class="btn" onclick="handleNumKey(2)">2</button>
@@ -191,38 +182,35 @@
                     <button class="btn" onclick="handleNumKey(0)">0</button>
                 </div>
 
+                <!-- Commandes de lecture -->
                 <div class="transport-grid">
                     <div class="eject-section">
                         <span class="upper-label">OPEN/CLOSE</span>
-                        <button class="btn" id="eject-btn"><i
-                                class="fas fa-eject"></i></button>
+                        <button class="btn" id="eject-btn"><i class="fas fa-eject"></i></button>
                     </div>
                     <div class="eject-section">
                         <span class="upper-label">PREV</span>
-                        <button class="btn" id="prev-btn"><i
-                                class="fas fa-backward-step"></i></button>
+                        <button class="btn" id="prev-btn"><i class="fas fa-backward-step"></i></button>
                     </div>
                     <div class="eject-section">
                         <span class="upper-label">PLAY/PAUSE</span>
                         <button class="btn" id="play-btn">
-                            <i class="fas fa-play"></i><span
-                                style="margin: 0 2px;">/</span><i
-                                class="fas fa-pause"></i>
+                            <i class="fas fa-play"></i><span style="margin:0 2px;">/</span><i class="fas fa-pause"></i>
                         </button>
                     </div>
                     <div class="eject-section">
                         <span class="upper-label">NEXT</span>
-                        <button class="btn" id="next-btn"><i
-                                class="fas fa-forward-step"></i></button>
+                        <button class="btn" id="next-btn"><i class="fas fa-forward-step"></i></button>
                     </div>
                     <div class="eject-section">
                         <span class="upper-label">STOP</span>
-                        <button class="btn" id="stop-btn"><i
-                                class="fas fa-stop"></i></button>
+                        <button class="btn" id="stop-btn"><i class="fas fa-stop"></i></button>
                     </div>
                 </div>
-            </div>
 
+            </div><!-- fin .bottom-controls-row -->
+
+            <!-- TRAPPE CACHÉE : Bass / Treble / VU / Couleurs -->
             <div class="controls-and-hatch-section">
                 <div class="tone-group-wrapper">
                     <div class="tone-hatch-frame" onclick="toggleToneHatch()">
@@ -237,68 +225,52 @@
                                     <button class="btn btn-tone"
                                         onmouseenter="showToneDisplay('BASS', bassLevel)"
                                         onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustBass(-1)">Bass
-                                        -</button>
+                                        onclick="event.stopPropagation(); adjustBass(-1)">Bass -</button>
                                     <button class="btn btn-tone"
                                         onmouseenter="showToneDisplay('BASS', bassLevel)"
                                         onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustBass(1)">Bass
-                                        +</button>
-                                    <button class="btn btn-tone"
-                                        id="default-tone-btn"
+                                        onclick="event.stopPropagation(); adjustBass(1)">Bass +</button>
+                                    <button class="btn btn-tone" id="default-tone-btn"
                                         onclick="event.stopPropagation(); resetToneDefault()"
-                                        style="margin-left: 2px; margin-right: 2px;">RESET</button>
+                                        style="margin-left:2px; margin-right:2px;">RESET</button>
                                     <button class="btn btn-tone"
                                         onmouseenter="showToneDisplay('TREBLE', trebleLevel)"
                                         onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustTreble(-1)">Treble
-                                        -</button>
+                                        onclick="event.stopPropagation(); adjustTreble(-1)">Treble -</button>
                                     <button class="btn btn-tone"
                                         onmouseenter="showToneDisplay('TREBLE', trebleLevel)"
                                         onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustTreble(1)">Treble
-                                        +</button>
+                                        onclick="event.stopPropagation(); adjustTreble(1)">Treble +</button>
                                 </div>
                                 <span class="vertical-separator"></span>
                                 <div class="btn-group">
-                                    <button class="btn btn-tone"
-                                        id="vu-down-btn"
+                                    <button class="btn btn-tone" id="vu-down-btn"
                                         onmouseenter="showVUSense()"
                                         onmouseleave="startVUTimeout()"
-                                        onclick="event.stopPropagation(); adjustVUSense(-0.2)">VU
-                                        -</button>
+                                        onclick="event.stopPropagation(); adjustVUSense(-0.2)">VU -</button>
                                     <button class="btn btn-tone" id="vu-up-btn"
                                         onmouseenter="showVUSense()"
                                         onmouseleave="startVUTimeout()"
-                                        onclick="event.stopPropagation(); adjustVUSense(0.2)">VU
-                                        +</button>
+                                        onclick="event.stopPropagation(); adjustVUSense(0.2)">VU +</button>
+                                </div>
+                                <span class="vertical-separator"></span>
+                                <div class="btn-group">
+                                    <button class="btn btn-tone" onclick="event.stopPropagation(); openPlaylist()">TRACK LIST</button>
+                                    <button class="btn btn-tone" onclick="event.stopPropagation(); openArt()">COVER</button>
                                 </div>
                                 <span class="vertical-separator"></span>
                                 <div class="btn-group">
                                     <button class="btn btn-tone"
-                                        onclick="event.stopPropagation(); openPlaylist()">TRACK
-                                        LIST</button>
-                                    <button class="btn btn-tone"
-                                        onclick="event.stopPropagation(); openArt()">COVER</button>
-                                </div>
-                                <span class="vertical-separator"></span>
-                                <div class="btn-group">
-                                    <button class="btn btn-tone"
-                                        onclick="event.stopPropagation(); document.getElementById('vfd-color-trigger').click();">VFD
-                                        COLOR</button>
-                                    <button class="btn btn-tone"
-                                        onclick="event.stopPropagation();"
-                                        style="position: relative;">BACKGROUND<input
-                                            type="color"
-                                            oninput="document.body.style.background = this.value; document.body.style.backgroundImage = 'none';"
-                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none;">
+                                        onclick="event.stopPropagation(); document.getElementById('vfd-color-trigger').click();">VFD COLOR</button>
+                                    <button class="btn btn-tone" onclick="event.stopPropagation();" style="position:relative;">BACKGROUND
+                                        <input type="color"
+                                            oninput="document.body.style.background=this.value; document.body.style.backgroundImage='none';"
+                                            style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; border:none;">
                                     </button>
-                                    <button class="btn btn-tone"
-                                        onclick="event.stopPropagation();"
-                                        style="position: relative;">SHADOW<input
-                                            type="color" value="#6d6d6d"
+                                    <button class="btn btn-tone" onclick="event.stopPropagation();" style="position:relative;">SHADOW
+                                        <input type="color" value="#6d6d6d"
                                             oninput="document.documentElement.style.setProperty('--shadow-color', this.value)"
-                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none;">
+                                            style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; border:none;">
                                     </button>
                                 </div>
                             </div>
@@ -306,25 +278,9 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="power-modal" class="custom-modal">
-            <div class="modal-content power-alert">
-                <img src="assets/img/Technics_logo.png"
-                    class="main-logo-reset-menu"
-                    alt="Technics">
-                <h3 style="color:var(--vfd-blue); margin-top:0;">POWER OFF</h3>
-                <p
-                    style="color:#a0a0a0; font-size: 14px; letter-spacing: 1px;">Confirm
-                    system reset and clear playlist?</p>
-                <div
-                    style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
-                    <button class="btn btn-confirm"
-                        onclick="location.reload()">YES</button>
-                    <button class="btn btn-cancel"
-                        onclick="document.getElementById('power-modal').style.display='none'">NO</button>
-                </div>
-            </div>
-        </div>
+
+        </div><!-- fin .deck-container -->
+
         <script src="script.js"></script>
     </body>
 </html>

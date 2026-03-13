@@ -1,0 +1,22 @@
+:root {
+    --bg-black: #020202;
+    --shadow-color: #cfcfcf;
+    --deck-gray: #202020;
+    --vfd-blue: #40e0ff;
+    --vfd-green: #008000;
+    --vfd-yellow: #FFFF00;
+    --vfd-brown: #9F7E69;
+    --vfd-glow: rgba(64, 224, 255, 0.5);
+    --vfd-blue-dim: #003a4d;
+    --vfd-off: #0a0a0a;
+    --vfd-red: #ff3333;
+    --text-silver: #a0a0a0;
+    --text-beige: #b6b69f;
+    --text-gold: #7a6a0c;
+    --text-brown: #9F7E69;
+    --text-white: #ffffff;
+    --tray-border : #000000;
+    --ui-font: 'Segoe UI', Tahoma, sans-serif;
+    --digital-font: 'DS-Digital', sans-serif;
+    --brushed-metal: conic-gradient(from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg);
+}
