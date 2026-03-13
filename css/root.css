@@ -1,6 +1,7 @@
 :root {
     --bg-black: #020202;
-    --deck-gray: #2e2e2d;
+    --shadow-color: #cfcfcf;
+    --deck-gray: #202020;
     --vfd-blue: #40e0ff;
     --vfd-green: #008000;
     --vfd-yellow: #FFFF00;
@@ -14,6 +15,7 @@
     --text-gold: #7a6a0c;
     --text-brown: #9F7E69;
     --text-white: #ffffff;
+    --tray-border : #000000;
     --ui-font: 'Segoe UI', Tahoma, sans-serif;
     --digital-font: 'DS-Digital', sans-serif;
     --brushed-metal: conic-gradient(from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg);
