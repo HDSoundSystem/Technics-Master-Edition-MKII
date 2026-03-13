@@ -1,0 +1,18 @@
+:root {
+    --bg-color: #000000;
+    --shadow-color : #ebebeb;
+    --deck-color: #1a1a1b;
+    --vfd-color: #dfdfdf;
+    --vfd-glow: #8a8a8a;
+    --vfd-blue-dim: #003a4d;
+    --vfd-off: #0a0a0a;
+    --vfd-red: #ff3333;
+    --text-silver: #a0a0a0;
+    --text-beige: #b6b69f;
+    --text-gold: #7a6a0c;
+    --text-brown: #9F7E69;
+    --text-white: #ffffff;
+    --ui-font: 'Segoe UI', Tahoma, sans-serif;
+    --digital-font: 'DS-Digital', sans-serif;
+    --brushed-metal: conic-gradient(from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg);
+}
