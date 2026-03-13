@@ -1,6 +1,8 @@
 :root {
-    --bg-black: #000000;
-    --deck-gray: #1a1a1b;
+    --bg-color: #000000;
+    --shadow-color : #ebebeb;
+    --deck-color: #1a1a1b;
+    --border-L-R : #1a1a1b;
     --vfd-blue: #40e0ff;
     --vfd-green: #008000;
     --vfd-yellow: #FFFF00;
@@ -20,7 +22,7 @@
 }
 
 body {
-    background-color: var(--bg-black);
+    background-color: var(--bg-color);
     color: var(--text-silver);
     font-family: var(--ui-font);
     display: flex;
@@ -34,10 +36,10 @@ body {
 
 .deck-container {
     width: 1600px;
-    background-color: var(--deck-gray);
+    background-color: var(--deck-color);
     padding: 25px 120px 19px 120px;
     border-radius: 10px;
-    box-shadow: 0 200px 200px var(--shadow-color, rgb(109, 109, 109));
+    box-shadow: 0 200px 200px var(--shadow-color);
     position: relative;
     z-index: 1;
     /* Indispensable pour que les bordures dorées suivent l'arrondi */
@@ -112,7 +114,7 @@ body {
 .tray-mechanism {
     width: 100%;
     height: 100%;
-    background: var(--deck-gray);
+    background: var(--deck-color);
     z-index: 10;
     transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform;
@@ -246,8 +248,8 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    border-left: 1px solid #111;
-    border-right: 1px solid #111;
+    border-left: 1px solid var(--border-L-R);
+    border-right: 1px solid var(--border-L-R);
     margin: 0 25px;
     padding: 5px 0;
 }
