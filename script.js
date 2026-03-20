@@ -1,6 +1,6 @@
 const audio = new Audio();
 audio.crossOrigin = "anonymous";
-let playlist = [], currentIndex = 0;
+let playlist = [], currentIndex = 0, playlistMeta = [];
 let currentArt = "assets/img/Technics_cover.png", currentMeta = "Technics - Master - Edition MKII";
 let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
@@ -145,42 +145,84 @@ document.getElementById('minus-10-btn').onclick = () => {
 
 document.getElementById('peak-btn').onclick = async () => {
     if (!playlist.length || isPeakSearching) return;
-    isPeakSearching = true; audio.pause();
+    isPeakSearching = true;
+    audio.pause();
+
     const timeLabel = document.getElementById('time-label');
+    const timeSep = document.getElementById('time-sep');
     const originalLabel = timeLabel.innerText;
-    timeLabel.innerText = "PEAK SEARCH";
+    timeLabel.innerText = 'PEAK SEARCH';
+    timeSep.style.opacity = '0';
     document.getElementById('main-time-display').classList.add('vfd-input-blink');
-    let maxVal = 0, peakTime = 0;
-    const step = audio.duration / 50;
-    for (let i = 0; i < 50; i++) {
-        audio.currentTime = i * step;
-        await new Promise(r => setTimeout(r, 40));
-        if (analyzerL && analyzerR) {
-            analyzerL.getFloatTimeDomainData(dataArrayL);
-            analyzerR.getFloatTimeDomainData(dataArrayR);
-            let sumL = 0, sumR = 0;
-            for (let j = 0; j < dataArrayL.length; j++) { sumL += dataArrayL[j] * dataArrayL[j]; sumR += dataArrayR[j] * dataArrayR[j]; }
-            let currentMax = Math.sqrt((sumL + sumR) / (2 * dataArrayL.length));
-            if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
-        }
-    }
-    audio.currentTime = peakTime;
-    document.getElementById('main-time-display').classList.remove('vfd-input-blink');
-    timeLabel.innerText = "PEAK FOUND";
-    const simulatedVal = Math.floor(Math.min(1, maxVal * 6) * 40);
-    ['meter-L', 'meter-R'].forEach(id => {
-        const el = document.getElementById(id);
-        for (let i = 0; i < simulatedVal; i++) {
-            if (i >= 30) {
-                el.children[i].className = 'meter-segment on-red';
-            } else if (i >= 20) {
-                el.children[i].className = 'meter-segment on-orange';
-            } else {
-                el.children[i].className = 'meter-segment on-blue';
+
+    try {
+        // Lire le fichier source en ArrayBuffer
+        const file = playlist[currentIndex];
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Décoder via un contexte offline pour accéder aux samples bruts
+        const offlineCtx = new OfflineAudioContext(2, 1, 44100);
+        const audioBuffer = await offlineCtx.decodeAudioData(arrayBuffer);
+
+        const duration = audioBuffer.duration;
+        const sampleRate = audioBuffer.sampleRate;
+        const nChannels = audioBuffer.numberOfChannels;
+
+        // Diviser en 200 fenêtres, calculer le RMS de chaque fenêtre
+        const windowCount = 200;
+        const samplesPerWindow = Math.floor(audioBuffer.length / windowCount);
+        let maxRms = 0;
+        let peakWindow = 0;
+
+        for (let w = 0; w < windowCount; w++) {
+            let sum = 0, count = 0;
+            const start = w * samplesPerWindow;
+            const end = Math.min(start + samplesPerWindow, audioBuffer.length);
+            for (let ch = 0; ch < nChannels; ch++) {
+                const data = audioBuffer.getChannelData(ch);
+                for (let s = start; s < end; s++) {
+                    sum += data[s] * data[s];
+                    count++;
+                }
             }
+            const rms = Math.sqrt(sum / count);
+            if (rms > maxRms) { maxRms = rms; peakWindow = w; }
         }
-    });
-    setTimeout(() => { timeLabel.innerText = originalLabel; isPeakSearching = false; updateTimeDisplay(); }, 2000);
+
+        const peakTime = (peakWindow / windowCount) * duration;
+        audio.currentTime = peakTime;
+
+        document.getElementById('main-time-display').classList.remove('vfd-input-blink');
+        timeLabel.innerText = 'PEAK FOUND';
+
+        // Afficher le niveau sur les VU mètres
+        const simulatedVal = Math.floor(Math.min(1, maxRms * 4) * 40);
+        ['meter-L', 'meter-R'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            for (let i = 0; i < 40; i++) {
+                if (i < simulatedVal) {
+                    el.children[i].className = i >= 30 ? 'meter-segment on-red'
+                        : i >= 20 ? 'meter-segment on-orange'
+                        : 'meter-segment on-blue';
+                } else {
+                    el.children[i].className = 'meter-segment';
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error('Peak search error:', err);
+        document.getElementById('main-time-display').classList.remove('vfd-input-blink');
+        timeLabel.innerText = 'PEAK ERROR';
+    }
+
+    setTimeout(() => {
+        timeLabel.innerText = originalLabel;
+        timeSep.style.opacity = '1';
+        isPeakSearching = false;
+        updateTimeDisplay();
+    }, 2000);
 };
 
 document.getElementById('vu-btn').onclick = () => {
@@ -324,7 +366,7 @@ function loadTrack(idx, forcePlay = false) {
     }
     updateMediaSession();
     setupAudio();
-    extractMetadata(playlist[currentIndex]);
+    extractMetadata(playlist[currentIndex], currentIndex);
 }
 
 if ('mediaSession' in navigator) {
@@ -376,32 +418,113 @@ function executeJump() {
     else updateDig('t', currentIndex + 1);
 }
 
-function extractMetadata(file) {
+function extractMetadata(file, idx) {
+    // Initialise avec des valeurs par défaut
+    if (!playlistMeta[idx]) {
+        playlistMeta[idx] = { artist: 'Unknown Artist', album: 'Unknown Album', title: file.name, cover: 'img/Technics_cover.png' };
+    }
     if (typeof jsmediatags === "undefined") return;
     jsmediatags.read(file, {
         onSuccess: (tag) => {
             const t = tag.tags;
-            currentMeta = `${t.artist || "Unknown Artist"} - ${t.album || "Unknown Album"} - ${t.title || file.name}`;
+            const artist = t.artist || 'Unknown Artist';
+            const album = t.album || 'Unknown Album';
+            const title = t.title || file.name;
+            let cover = 'img/Technics_cover.png';
             const p = t.picture;
             if (p) {
-                let b64 = ""; for (let i = 0; i < p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
-                currentArt = `data:${p.format};base64,${window.btoa(b64)}`;
-            } else currentArt = "assets/img/Technics_cover.png";
-            updateMediaSession();
+                let b64 = "";
+                for (let i = 0; i < p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
+                cover = `data:${p.format};base64,${window.btoa(b64)}`;
+            }
+            playlistMeta[idx] = { artist, album, title, cover };
+            // Si c'est la piste courante, mettre à jour currentArt/currentMeta
+            if (idx === currentIndex) {
+                currentArt = cover;
+                currentMeta = `${artist} - ${album} - ${title}`;
+                updateMediaSession();
+            }
+            // Rafraîchir la playlist si elle est ouverte
+            const modal = document.getElementById('playlist-modal');
+            if (modal.style.display !== 'none') refreshPlaylistItem(idx);
         }
     });
+}
+
+function buildTrackItem(idx) {
+    const file = playlist[idx];
+    const meta = playlistMeta[idx] || { artist: '', album: '', title: file.name, cover: 'img/Technics_cover.png' };
+    const item = document.createElement('div');
+    item.className = 'track-item' + (idx === currentIndex ? ' active' : '');
+    item.id = `track-item-${idx}`;
+
+    const cover = document.createElement('img');
+    cover.className = 'track-item-cover';
+    cover.src = meta.cover;
+    cover.alt = '';
+
+    const info = document.createElement('div');
+    info.className = 'track-item-info';
+    info.innerHTML = `
+        <div class="track-item-artist">${meta.artist}</div>
+        <div class="track-item-album">${meta.album}</div>
+        <div class="track-item-title">${idx + 1 < 10 ? '0' + (idx + 1) : idx + 1}. ${meta.title}</div>
+    `;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'track-remove-btn';
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    removeBtn.title = 'Retirer de la playlist';
+    removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeTrack(idx);
+    };
+
+    // Clic sur la piste : lance sans fermer la modale
+    item.onclick = () => {
+        loadTrack(idx);
+        // Met à jour l'état actif sans fermer
+        document.querySelectorAll('.track-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+    };
+
+    item.appendChild(cover);
+    item.appendChild(info);
+    item.appendChild(removeBtn);
+    return item;
+}
+
+function refreshPlaylistItem(idx) {
+    const existing = document.getElementById(`track-item-${idx}`);
+    if (!existing) return;
+    const newItem = buildTrackItem(idx);
+    existing.replaceWith(newItem);
+}
+
+function removeTrack(idx) {
+    playlist.splice(idx, 1);
+    playlistMeta.splice(idx, 1);
+    if (playlist.length === 0) {
+        document.getElementById('playlist-modal').style.display = 'none';
+        audio.pause();
+        audio.src = '';
+        return;
+    }
+    if (idx < currentIndex) currentIndex--;
+    else if (idx === currentIndex) {
+        currentIndex = Math.min(currentIndex, playlist.length - 1);
+        loadTrack(currentIndex);
+    }
+    updateGrid();
+    openPlaylist(); // Rafraîchit la liste
 }
 
 function openPlaylist() {
     if (playlist.length === 0) return;
     const container = document.getElementById('track-list-container');
-    container.innerHTML = "";
+    container.innerHTML = '';
     playlist.forEach((file, idx) => {
-        const item = document.createElement('div');
-        item.className = 'track-item' + (idx === currentIndex ? ' active' : '');
-        item.innerText = `${(idx + 1).toString().padStart(2, '0')}. ${file.name}`;
-        item.onclick = () => { loadTrack(idx); document.getElementById('playlist-modal').style.display = 'none'; };
-        container.appendChild(item);
+        container.appendChild(buildTrackItem(idx));
     });
     document.getElementById('playlist-modal').style.display = 'flex';
 }
@@ -412,10 +535,9 @@ document.getElementById('file-input').onchange = (e) => {
     if (!newFiles.length) return;
     const startIndex = playlist.length;
     playlist = playlist.concat(newFiles);
-    // Ferme le tiroir automatiquement
-    const tray = document.getElementById('tray-front');
-    tray.classList.remove('open');
-    tray.closest('.tray-outer-slot').classList.remove('tray-open');
+    // Pré-extraire les métadonnées de tous les nouveaux fichiers
+    newFiles.forEach((file, i) => extractMetadata(file, startIndex + i));
+    document.getElementById('tray-front').classList.remove('open');
     loadTrack(startIndex === 0 ? 0 : startIndex);
     updateGrid();
 };
@@ -432,17 +554,22 @@ document.getElementById('prev-btn').onclick = () => {
 
 document.getElementById('eject-btn').onclick = () => {
     const tray = document.getElementById('tray-front');
-    const slot = tray.closest('.tray-outer-slot');
     const isOpen = tray.classList.contains('open');
     if (!isOpen) {
-        // Ouvre le tiroir puis déclenche le sélecteur de fichiers
         tray.classList.add('open');
-        slot.classList.add('tray-open');
-        setTimeout(() => document.getElementById('file-input').click(), 600);
+        setTimeout(() => {
+            document.getElementById('file-input').click();
+            // Détecte le retour de focus (annulation ou sélection)
+            const onFocus = () => {
+                setTimeout(() => {
+                    document.getElementById('tray-front').classList.remove('open');
+                }, 300);
+                window.removeEventListener('focus', onFocus);
+            };
+            window.addEventListener('focus', onFocus);
+        }, 600);
     } else {
-        // Fermeture manuelle
         tray.classList.remove('open');
-        slot.classList.remove('tray-open');
     }
 };
 

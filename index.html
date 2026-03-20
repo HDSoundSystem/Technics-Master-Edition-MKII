@@ -27,16 +27,16 @@
             </div>
         </div>
 
-        <div id="playlist-modal" onclick="this.style.display='none'">
-            <div class="modal-content list-content"
-                onclick="event.stopPropagation()">
-                <h3
-                    style="color:var(--vfd-blue); margin-top:0; letter-spacing:2px;">TRACK
-                    LIST</h3>
-                <div id="track-list-container"></div>
-                <button class="btn"
-                    style="margin-top:20px; height:35px; width:100px; margin-left:auto; margin-right:auto;"
-                    onclick="document.getElementById('playlist-modal').style.display='none'">CLOSE</button>
+        <div id="playlist-modal">
+            <div class="modal-content list-content" onclick="event.stopPropagation()">
+                <div class="playlist-header">
+                    <h3 style="color:var(--vfd-blue); margin:0; letter-spacing:2px;">TRACK LIST</h3>
+                    <button class="btn" style="height:30px; width:70px; font-size:10px;"
+                        onclick="document.getElementById('playlist-modal').style.display='none'">CLOSE</button>
+                </div>
+                <div class="playlist-scroll">
+                    <div id="track-list-container"></div>
+                </div>
             </div>
         </div>
 
