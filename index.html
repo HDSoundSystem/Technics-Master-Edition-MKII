@@ -29,12 +29,14 @@
 
         <div id="playlist-modal">
             <div class="modal-content list-content" onclick="event.stopPropagation()">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div class="playlist-header">
                     <h3 style="color:var(--vfd-blue); margin:0; letter-spacing:2px;">TRACK LIST</h3>
                     <button class="btn" style="height:30px; width:70px; font-size:10px;"
                         onclick="document.getElementById('playlist-modal').style.display='none'">CLOSE</button>
                 </div>
-                <div id="track-list-container"></div>
+                <div class="playlist-scroll">
+                    <div id="track-list-container"></div>
+                </div>
             </div>
         </div>
 

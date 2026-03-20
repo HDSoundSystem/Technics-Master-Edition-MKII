@@ -425,18 +425,64 @@ body {
 .list-content {
     width: 380px;
     max-height: 75vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     background: #0d0d0d;
     border: 1px solid #2a2a2a;
     border-radius: 6px;
     box-shadow: -10px 0 40px rgba(0,0,0,0.8);
-    padding: 20px;
     box-sizing: border-box;
+    overflow: hidden;
+}
+
+.playlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #2a2a2a;
+    background: #0d0d0d;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.playlist-scroll {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding: 0 20px 12px 20px;
+}
+
+/* Ascenseur stylisé aux couleurs du lecteur */
+.playlist-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.playlist-scroll::-webkit-scrollbar-track {
+    background: #0a0a0a;
+    border-radius: 3px;
+}
+
+.playlist-scroll::-webkit-scrollbar-thumb {
+    background: #3a3a3b;
+    border-radius: 3px;
+    border: 1px solid #555;
+}
+
+.playlist-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--text-silver);
+}
+
+/* Firefox */
+.playlist-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3b #0a0a0a;
 }
 
 #track-list-container {
     text-align: left;
-    margin-top: 10px;
     border-top: 1px solid #1a1a1a;
 }
 
