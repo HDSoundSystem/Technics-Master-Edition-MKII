@@ -180,8 +180,8 @@ body {
 
 .transport-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 35px;
+    grid-template-columns: repeat(6, 1fr); /* Passage à 6 colonnes */
+    gap: 15px; /* Réduction de l'espace (était à 35px) pour gagner de la place */
     margin-top: 5px;
     margin-bottom: 0px;
     width: 880px;
@@ -670,10 +670,7 @@ body {
 
 .volume-controls {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    /* 3 colonnes pour les boutons */
-    grid-template-rows: auto auto;
-    /* 2 lignes : label + boutons */
+    grid-template-columns: 1fr 1fr; /* Passage de 3 à 2 colonnes */
     gap: 10px;
     width: 100%;
     margin-top: 90px;
@@ -1112,4 +1109,16 @@ body {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 15px;
+}
+
+.transport-grid .btn, #mute-btn {
+    height: 60px;
+    width: 100%;
+    font-size: 14px; /* Pour que l'icône soit aussi grande que celle de STOP */
+    padding: 0;
+}
+
+/* On s'assure que l'icône à l'intérieur suit la même règle de taille */
+#mute-btn i {
+    font-size: 18px; 
 }
