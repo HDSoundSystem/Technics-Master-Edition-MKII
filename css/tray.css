@@ -1,0 +1,40 @@
+.tray-outer-slot {
+    width: 880px;
+    height: 75px;
+    background: none;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -50px;
+    margin-bottom: 20px;
+}
+
+.tray-mechanism {
+    width: 100%;
+    height: 100%;
+    background: var(--deck-color);
+    z-index: 10;
+    transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #000;
+    box-sizing: border-box;
+    border-top-color: #333;
+}
+
+.tray-mechanism.open {
+    transform: translateY(70px);
+}
+
+.mash-logo-tray {
+    height: 35px;
+    opacity: 0.8;
+}
+
+.tray-text {
+    font-family: var(--raleway-font);
+}
