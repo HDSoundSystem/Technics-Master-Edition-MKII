@@ -16,6 +16,7 @@ let trebleLevel = 0;
 let userPaused = false;
 let isABLocked = false;
 let isDisplayLocked = false;
+let currentRotation = 0;
 
 
 // CORRECTION 1 : Variable pour empêcher la double connexion audio
@@ -629,5 +630,71 @@ function resetToneDefault() {
         timeSep.style.opacity = "1";
         updateTimeDisplay();
     }, 1500);
+}
+
+function adjustVolume(change) {
+    // On annule le mute si on touche au volume
+    isMuted = false;
+    
+    // Calcul du nouveau volume (entre 0 et 1)
+    let newVol = audio.volume + change;
+    audio.volume = Math.max(0, Math.min(1, Math.round(newVol * 100) / 100));
+    
+    // Mise à jour de l'affichage VFD (le texte bleu)
+    showVolumeDisplay();
+    
+    // On cache l'affichage après 1.5 seconde d'inactivité
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
+}
+
+let knobInterval = null;
+let knobDelayTimeout = null;
+
+function handleKnobMouseDown(event) {
+    const knob = event.currentTarget;
+    const rect = knob.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const middle = rect.width / 2;
+    const direction = clickX < middle ? -1 : 1;
+
+    // 1. Action immédiate au clic
+    applyKnobAction(direction);
+
+    // 2. Attendre 300ms avant de commencer la répétition (comme un vrai bouton)
+    knobDelayTimeout = setTimeout(() => {
+        knobInterval = setInterval(() => {
+            applyKnobAction(direction);
+        }, 80); // Vitesse de défilement (80ms pour plus de fluidité)
+    }, 300);
+}
+
+function applyKnobAction(direction) {
+    // On utilise un pas de 0.01 pour la précision
+    const step = 0.01;
+    adjustVolume(direction * step);
+    
+    // Rotation visuelle : 3 degrés par pas
+    rotateKnob(direction * 3);
+}
+
+function stopKnobInterval() {
+    // On nettoie le délai et l'intervalle
+    if (knobDelayTimeout) clearTimeout(knobDelayTimeout);
+    if (knobInterval) clearInterval(knobInterval);
+    knobInterval = null;
+    knobDelayTimeout = null;
+}
+
+function rotateKnob(deg) {
+    currentRotation += deg;
+    // Limites de rotation (Physique d'un vrai bouton Technics)
+    if (currentRotation < -150) currentRotation = -150;
+    if (currentRotation > 150) currentRotation = 150;
+    
+    const knobEl = document.getElementById('volume-knob');
+    if (knobEl) {
+        knobEl.style.transform = `rotate(${currentRotation}deg)`;
+    }
 }
 

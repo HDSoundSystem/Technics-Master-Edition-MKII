@@ -152,7 +152,7 @@
 
                     <div class="controls-right-stack">
                         <div class="right-buttons-grid">
-                            <span class="volume-label">SEARCH</span>
+                            <span class="search-label">SEARCH</span>
                             <button class="btn" id="rew-btn">◀◀</button>
                             <button class="btn" id="fwd-btn">▶▶</button>
                             <button class="btn" id="minus-10-btn">- 10s</button>
@@ -164,10 +164,15 @@
                         </div>
                         <div class="volume-controls">
                             <span class="volume-label">VOLUME</span>
-                            <button class="btn" id="vol-down-btn"><i
-                                    class="fa-solid fa-volume-low"></i></button>
-                            <button class="btn" id="vol-up-btn"><i
-                                    class="fa-solid fa-volume-high"></i></button>
+                            <div class="knob-container">
+                                <!-- Un seul bouton qui gère les deux actions -->
+                                <div class="volume-knob" id="volume-knob"
+                                    onmousedown="handleKnobMouseDown(event)"
+                                    onmouseup="stopKnobInterval()"
+                                    onmouseleave="stopKnobInterval()">
+                                    <div class="knob-indicator"></div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
