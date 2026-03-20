@@ -156,47 +156,32 @@ body {
 
 .controls-left-stack {
     width: 230px;
+    /* 2 boutons de 110px + 10px gap = 230px */
     position: absolute;
     left: 0;
-    top: 80px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.right-buttons-above {
+    top: 130px;
+    /* Positionné sous le bouton Power (hauteur 50px + 10px gap) */
     display: grid;
     grid-template-columns: 1fr 1fr;
+    /* 2 colonnes pour mettre les boutons côte à côte */
     gap: 10px;
-    width: 100%;
-    margin-bottom: 5px;
 }
 
-.right-buttons-above .btn {
-    width: 100%;
-    height: 50px;
-}
-
-/* TIME MODE + VU METER côte à côte */
-.time-vu-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    width: 100%;
-}
-
-.time-vu-row .btn {
+.controls-left-stack .btn {
     width: 100%;
     height: 50px;
 }
 
 
-
+.controls-left-stack .btn {
+    width: 100%;
+    height: 50px;
+}
 
 .transport-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 35px;
     margin-top: 5px;
     margin-bottom: 0px;
     width: 880px;
@@ -695,7 +680,7 @@ body {
 }
 
 
-#vol-down-btn, #vol-up-btn {
+#vol-down-btn, #vol-up-btn, #mute-btn {
     height: 50px;
     width: 100%;
 }

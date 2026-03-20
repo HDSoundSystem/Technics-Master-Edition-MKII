@@ -7,13 +7,13 @@
         <meta name="author" content="Yohann Zaoui">
         <meta name="keywords"
             content="Technics, Hi-Res Audio, Audio Player, Mini, HiFi, Touchscreen, Music Player, Web App, flac, mp3, music">
-        <link rel="icon" type="image/x-icon" href="img/favicon.png">
-        <link rel="apple-touch-icon" href="img/favicon.png">
-        <link rel="icon" type="image/png" href="img/favicon.png">
+        <link rel="icon" type="image/x-icon" href="assets/img/favicon.png">
+        <link rel="apple-touch-icon" href="assets/img/favicon.png">
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
         <link rel="manifest" href="manifest.json">
         <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     </head>
@@ -69,21 +69,8 @@
                     </div>
 
                     <div class="controls-left-stack">
-                        <div class="right-buttons-above">
-                            <span class="volume-label">SEARCH</span>
-                            <button class="btn" id="rew-btn">◀◀</button>
-                            <button class="btn" id="fwd-btn">▶▶</button>
-                            <button class="btn" id="minus-10-btn">- 10s</button>
-                            <button class="btn" id="plus-10-btn">+ 10s</button>
-                            <button class="btn" id="random-btn">Random</button>
-                            <button class="btn" id="repeat-btn">Repeat</button>
-                            <button class="btn" id="ab-btn">A - B</button>
-                            <button class="btn" id="peak-btn">Peak</button>
-                        </div>
-                        <div class="time-vu-row">
-                            <button class="btn" id="time-btn">Time Mode</button>
-                            <button class="btn" id="vu-btn">VU Meter</button>
-                        </div>
+                        <button class="btn" id="time-btn">Time Mode</button>
+                        <button class="btn" id="vu-btn">VU Meter</button>
                     </div>
 
                     <section class="display-panel">
@@ -163,10 +150,23 @@
                     </section>
 
                     <div class="controls-right-stack">
+                        <div class="right-buttons-grid">
+                            <span class="volume-label">SEARCH</span>
+                            <button class="btn" id="rew-btn">◀◀</button>
+                            <button class="btn" id="fwd-btn">▶▶</button>
+                            <button class="btn" id="minus-10-btn">- 10s</button>
+                            <button class="btn" id="plus-10-btn">+ 10s</button>
+                            <button class="btn" id="random-btn">Random</button>
+                            <button class="btn" id="repeat-btn">Repeat</button>
+                            <button class="btn" id="ab-btn">A - B</button>
+                            <button class="btn" id="peak-btn">Peak</button>
+                        </div>
                         <div class="volume-controls">
                             <span class="volume-label">VOLUME</span>
                             <button class="btn" id="vol-down-btn"><i
                                     class="fa-solid fa-volume-low"></i></button>
+                            <button class="btn" id="mute-btn"><i
+                                    class="fa-solid fa-volume-xmark"></i></button>
                             <button class="btn" id="vol-up-btn"><i
                                     class="fa-solid fa-volume-high"></i></button>
                         </div>
@@ -215,11 +215,6 @@
                         <span class="upper-label">STOP</span>
                         <button class="btn" id="stop-btn"><i
                                 class="fas fa-stop"></i></button>
-                    </div>
-                    <div class="eject-section">
-                        <span class="upper-label">MUTE</span>
-                        <button class="btn" id="mute-btn"><i
-                                class="fa-solid fa-volume-xmark"></i></button>
                     </div>
                 </div>
             </div>
