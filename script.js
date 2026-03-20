@@ -1,6 +1,6 @@
 const audio = new Audio();
 audio.crossOrigin = "anonymous";
-let playlist = [], currentIndex = 0;
+let playlist = [], currentIndex = 0, playlistMeta = [];
 let currentArt = "assets/img/Technics_cover.png", currentMeta = "Technics - Master - Edition MKII";
 let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
@@ -9,7 +9,7 @@ let audioCtx, analyzerL, analyzerR, dataArrayL, dataArrayR, searchInterval = nul
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
-let vuMultiplier = 1.0;
+let vuMultiplier = 1.2;
 let bassFilter, trebleFilter;
 let bassLevel = 0;
 let trebleLevel = 0;
@@ -366,7 +366,7 @@ function loadTrack(idx, forcePlay = false) {
     }
     updateMediaSession();
     setupAudio();
-    extractMetadata(playlist[currentIndex]);
+    extractMetadata(playlist[currentIndex], currentIndex);
 }
 
 if ('mediaSession' in navigator) {
@@ -418,32 +418,113 @@ function executeJump() {
     else updateDig('t', currentIndex + 1);
 }
 
-function extractMetadata(file) {
+function extractMetadata(file, idx) {
+    // Initialise avec des valeurs par défaut
+    if (!playlistMeta[idx]) {
+        playlistMeta[idx] = { artist: 'Unknown Artist', album: 'Unknown Album', title: file.name, cover: 'img/Technics_cover.png' };
+    }
     if (typeof jsmediatags === "undefined") return;
     jsmediatags.read(file, {
         onSuccess: (tag) => {
             const t = tag.tags;
-            currentMeta = `${t.artist || "Unknown Artist"} - ${t.album || "Unknown Album"} - ${t.title || file.name}`;
+            const artist = t.artist || 'Unknown Artist';
+            const album = t.album || 'Unknown Album';
+            const title = t.title || file.name;
+            let cover = 'img/Technics_cover.png';
             const p = t.picture;
             if (p) {
-                let b64 = ""; for (let i = 0; i < p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
-                currentArt = `data:${p.format};base64,${window.btoa(b64)}`;
-            } else currentArt = "assets/img/Technics_cover.png";
-            updateMediaSession();
+                let b64 = "";
+                for (let i = 0; i < p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
+                cover = `data:${p.format};base64,${window.btoa(b64)}`;
+            }
+            playlistMeta[idx] = { artist, album, title, cover };
+            // Si c'est la piste courante, mettre à jour currentArt/currentMeta
+            if (idx === currentIndex) {
+                currentArt = cover;
+                currentMeta = `${artist} - ${album} - ${title}`;
+                updateMediaSession();
+            }
+            // Rafraîchir la playlist si elle est ouverte
+            const modal = document.getElementById('playlist-modal');
+            if (modal.style.display !== 'none') refreshPlaylistItem(idx);
         }
     });
+}
+
+function buildTrackItem(idx) {
+    const file = playlist[idx];
+    const meta = playlistMeta[idx] || { artist: '', album: '', title: file.name, cover: 'img/Technics_cover.png' };
+    const item = document.createElement('div');
+    item.className = 'track-item' + (idx === currentIndex ? ' active' : '');
+    item.id = `track-item-${idx}`;
+
+    const cover = document.createElement('img');
+    cover.className = 'track-item-cover';
+    cover.src = meta.cover;
+    cover.alt = '';
+
+    const info = document.createElement('div');
+    info.className = 'track-item-info';
+    info.innerHTML = `
+        <div class="track-item-artist">${meta.artist}</div>
+        <div class="track-item-album">${meta.album}</div>
+        <div class="track-item-title">${idx + 1 < 10 ? '0' + (idx + 1) : idx + 1}. ${meta.title}</div>
+    `;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'track-remove-btn';
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    removeBtn.title = 'Retirer de la playlist';
+    removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeTrack(idx);
+    };
+
+    // Clic sur la piste : lance sans fermer la modale
+    item.onclick = () => {
+        loadTrack(idx);
+        // Met à jour l'état actif sans fermer
+        document.querySelectorAll('.track-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+    };
+
+    item.appendChild(cover);
+    item.appendChild(info);
+    item.appendChild(removeBtn);
+    return item;
+}
+
+function refreshPlaylistItem(idx) {
+    const existing = document.getElementById(`track-item-${idx}`);
+    if (!existing) return;
+    const newItem = buildTrackItem(idx);
+    existing.replaceWith(newItem);
+}
+
+function removeTrack(idx) {
+    playlist.splice(idx, 1);
+    playlistMeta.splice(idx, 1);
+    if (playlist.length === 0) {
+        document.getElementById('playlist-modal').style.display = 'none';
+        audio.pause();
+        audio.src = '';
+        return;
+    }
+    if (idx < currentIndex) currentIndex--;
+    else if (idx === currentIndex) {
+        currentIndex = Math.min(currentIndex, playlist.length - 1);
+        loadTrack(currentIndex);
+    }
+    updateGrid();
+    openPlaylist(); // Rafraîchit la liste
 }
 
 function openPlaylist() {
     if (playlist.length === 0) return;
     const container = document.getElementById('track-list-container');
-    container.innerHTML = "";
+    container.innerHTML = '';
     playlist.forEach((file, idx) => {
-        const item = document.createElement('div');
-        item.className = 'track-item' + (idx === currentIndex ? ' active' : '');
-        item.innerText = `${(idx + 1).toString().padStart(2, '0')}. ${file.name}`;
-        item.onclick = () => { loadTrack(idx); document.getElementById('playlist-modal').style.display = 'none'; };
-        container.appendChild(item);
+        container.appendChild(buildTrackItem(idx));
     });
     document.getElementById('playlist-modal').style.display = 'flex';
 }
@@ -454,7 +535,8 @@ document.getElementById('file-input').onchange = (e) => {
     if (!newFiles.length) return;
     const startIndex = playlist.length;
     playlist = playlist.concat(newFiles);
-    // Ferme le tiroir automatiquement
+    // Pré-extraire les métadonnées de tous les nouveaux fichiers
+    newFiles.forEach((file, i) => extractMetadata(file, startIndex + i));
     document.getElementById('tray-front').classList.remove('open');
     loadTrack(startIndex === 0 ? 0 : startIndex);
     updateGrid();
