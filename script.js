@@ -575,14 +575,6 @@ function startVUTimeout() {
     volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
 }
 
-function toggleVUHatch() {
-    const hatch = document.getElementById('vu-hatch-block');
-    if (hatch) {
-        hatch.classList.toggle('hatch-open');
-        hatch.classList.toggle('hatch-closed');
-    }
-}
-
 function adjustBass(change) {
     bassLevel = Math.max(-10, Math.min(10, bassLevel + change));
     if (bassFilter) bassFilter.gain.setTargetAtTime(bassLevel, audioCtx.currentTime, 0.01);
@@ -610,11 +602,6 @@ function showToneDisplay(label, value) {
     volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
 }
 
-function toggleToneHatch() {
-    const hatch = document.getElementById('tone-hatch-block');
-    if (hatch) hatch.classList.toggle('hatch-open');
-}
-
 function checkLock(e) {
     if (isABLocked) {
         const lockIndicator = document.getElementById('vfd-ab-lock');
@@ -626,34 +613,6 @@ function checkLock(e) {
         return true;
     }
     return false;
-}
-
-
-
-function resetToneDefault() {
-    bassLevel = 0;
-    trebleLevel = 0;
-    if (bassFilter) bassFilter.gain.value = 0;
-    if (trebleFilter) trebleFilter.gain.value = 0;
-
-    isDisplayLocked = true;
-    const timeLabel = document.getElementById('time-label');
-    const timeSep = document.getElementById('time-sep');
-
-    timeLabel.innerText = "TONE RESET";
-    timeSep.style.opacity = "0";
-
-    document.getElementById('m-d1').innerText = " ";
-    document.getElementById('m-d2').innerText = " ";
-    document.getElementById('s-d1').innerText = " ";
-    document.getElementById('s-d2').innerText = " ";
-
-    setTimeout(() => {
-        isDisplayLocked = false;
-        timeLabel.innerText = (timeMode === 0) ? "Min : Sec" : "- Min : Sec";
-        timeSep.style.opacity = "1";
-        updateTimeDisplay();
-    }, 1500);
 }
 
 function adjustVolume(change) {
@@ -720,5 +679,47 @@ function rotateKnob(deg) {
     if (knobEl) {
         knobEl.style.transform = `rotate(${currentRotation}deg)`;
     }
+}
+
+// --- Tone knobs (Bass / Treble) ---
+let toneKnobInterval = null;
+let toneKnobDelayTimeout = null;
+let bassRotation = 0;
+let trebleRotation = 0;
+
+function handleToneKnobMouseDown(event, type) {
+    const knob = event.currentTarget;
+    const rect = knob.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const direction = clickX < rect.width / 2 ? -1 : 1;
+
+    applyToneKnobAction(direction, type);
+
+    toneKnobDelayTimeout = setTimeout(() => {
+        toneKnobInterval = setInterval(() => {
+            applyToneKnobAction(direction, type);
+        }, 80);
+    }, 300);
+}
+
+function applyToneKnobAction(direction, type) {
+    if (type === 'bass') {
+        adjustBass(direction);
+        bassRotation = Math.max(-150, Math.min(150, bassRotation + direction * 15));
+        const el = document.getElementById('bass-knob');
+        if (el) el.style.transform = `rotate(${bassRotation}deg)`;
+    } else {
+        adjustTreble(direction);
+        trebleRotation = Math.max(-150, Math.min(150, trebleRotation + direction * 15));
+        const el = document.getElementById('treble-knob');
+        if (el) el.style.transform = `rotate(${trebleRotation}deg)`;
+    }
+}
+
+function stopToneKnobInterval() {
+    if (toneKnobDelayTimeout) clearTimeout(toneKnobDelayTimeout);
+    if (toneKnobInterval) clearInterval(toneKnobInterval);
+    toneKnobInterval = null;
+    toneKnobDelayTimeout = null;
 }
 

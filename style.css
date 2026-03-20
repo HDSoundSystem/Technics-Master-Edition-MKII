@@ -124,20 +124,32 @@ body {
 
 .controls-left-stack {
     width: 230px;
-    /* 2 boutons de 110px + 10px gap = 230px */
     position: absolute;
     left: 0;
-    top: 130px;
-    /* Positionné sous le bouton Power (hauteur 50px + 10px gap) */
+    top: 110px;
+}
+
+.left-buttons-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    /* 2 colonnes pour mettre les boutons côte à côte */
     gap: 10px;
+    width: 100%;
 }
 
 .controls-left-stack .btn {
     width: 100%;
     height: 50px;
+}
+
+.controls-right-stack {
+    width: 230px;
+    position: absolute;
+    right: 0;
+    top: -30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .transport-grid {
@@ -358,18 +370,6 @@ body {
     color: var(--text-silver);
 }
 
-.controls-and-hatch-section {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 25px;
-    margin-bottom: 0px;
-    padding: 0 30px;
-    /* Augmentez cette valeur pour réduire la largeur de la trappe */
-    /* Ex: 50px = trappe plus étroite, 10px = trappe plus large */
-    box-sizing: border-box;
-}
 
 .numeric-grid {
     display: grid;
@@ -587,28 +587,7 @@ body {
     justify-content: flex-start;
 }
 
-.right-buttons-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    width: 100%;
-}
-
-.right-buttons-grid .btn {
-    width: 100%;
-    height: 50px;
-}
-
-/* On force la taille identique au volume */
-#vu-down-btn, #vu-up-btn {
-    width: 90px;
-    height: 45px;
-    min-width: 0;
-    flex: none;
-    margin-bottom: 20px;
-}
-
-/* Style optionnel pour le label (comme tu as demandé précédemment) */
+/* Style optionnel pour le label */
 
 #over-arrow {
     color: #220000;
@@ -655,203 +634,28 @@ body {
     background-color: rgba(255, 255, 255, 0.01);
 }
 
-.hatch-texture {
-    width: 100%;
-    height: 100%;
-    background: var(--deck-gray);
-}
-
 .upper-label {
     display: block;
-    /* Permet d'appliquer des marges correctement */
     margin-top: 5px;
-    /* Ajuste cette valeur pour descendre le mot plus ou moins bas */
     margin-bottom: 3px;
-    /* Espace entre le mot et la trappe */
     transition: all 0.3s;
-    /* Optionnel : pour un mouvement fluide si tu le modifies */
     text-align: center;
 }
-
-/* Modification des marges pour s'adapter à la nouvelle position */
-.tone-controls-row {
-    display: flex;
-    justify-content: flex-start;
-    /* Aligne tout à gauche */
-    align-items: center;
-    height: 100%;
-    padding-left: 30px;
-    /* C'est cette valeur qui gère maintenant la position à gauche */
-    gap: 15px;
-}
-
-.tone-group {
-    display: flex;
-    align-items: flex-start;
-    /* Remplacez 'center' par 'flex-start' si vous voulez tout coller à gauche */
-    gap: 1px;
-    margin-bottom: -15px;
-}
-
-.tone-group-wrapper .upper-label {
-    display: block;
-    position: relative;
-    top: 5px;
-    /* Ajuste cette valeur : 20px pour descendre, -20px pour monter */
-    text-align: center;
-    width: 100%;
-}
-
-/* Style des boutons de tonalité */
-.btn-tone {
-    width: 90px;
-    height: 45px;
-    font-size: 11px;
-    min-width: 0;
-    flex: none;
-}
-
-.btn-group {
-    display: flex;
-    gap: 10px;
-}
-
-.tone-group-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    /* Permet à la trappe de prendre toute la largeur disponible */
-}
-
-.tone-hatch-frame {
-    width: 100%;
-    height: 95px;
-    background: #0a0a0a;
-    border: 1px solid #000;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
-    z-index: 100;
-    box-sizing: border-box;
-}
-
-#tone-hatch-block {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(180deg, #1a1a1b 0%, #151516 100%);
-    border: 1px solid #000;
-    border-top-color: #333;
-    box-sizing: border-box;
-    z-index: 20;
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-}
-
-#tone-hatch-block.hatch-open {
-    transform: translateY(90px);
-    /* Glisse vers le bas */
-}
-
-/* On ajuste l'alignement des boutons derrière la trappe */
-.tone-controls-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    padding: 0 10px;
-    gap: 8px;
-}
-
-.hatch-label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    font-size: 10px;
-    letter-spacing: 1px;
-    font-weight: bold;
-
-    color: #9aa0a5;
-    text-shadow:
-        0 1px 0 #000,
-        0 0 4px rgba(120, 160, 180, 0.25);
-
-    pointer-events: none;
-    user-select: none;
-    opacity: 0.9;
-}
-
-.hatch-open-label {
-    position: absolute;
-    /* On fixe la position dans le coin haut gauche */
-    top: 6px;
-    /* Distance depuis le haut */
-    left: 8px;
-    /* Distance depuis la gauche */
-
-    /* On retire le transform qui servait au centrage */
-    transform: none;
-
-    font-size: 10px;
-    letter-spacing: 1px;
-    font-weight: bold;
-
-    color: #9aa0a5;
-    text-shadow:
-        0 1px 0 #000,
-        0 0 4px rgba(120, 160, 180, 0.25);
-
-    pointer-events: none;
-    user-select: none;
-    opacity: 0.9;
-}
-
-#default-tone-btn {
-    width: 60px;
-    height: 45px;
-    font-size: 11px;
-    flex: none;
-    margin: 0 1px;
-}
-
-/* Effet au survol ou quand le bouton est actif */
 
 .btn i {
     font-size: 14px;
-    /* Taille des symboles */
     color: var(--text-silver);
-    /* Utilise ta couleur argentée */
     pointer-events: none;
-    /* Évite que l'icône bloque le clic du bouton */
 }
 
-/* Effet au survol ou quand le bouton est actif */
 .btn:hover i {
     color: var(--text-white);
     text-shadow: 0 0 5px var(--vfd-glow);
 }
 
-/* Effet au survol ou quand le bouton est actif */
 .btn:hover {
     color: var(--text-white);
     text-shadow: 0 0 5px var(--vfd-glow);
-}
-
-.vertical-separator {
-    display: inline-block;
-    width: 2px;
-    height: 30px;
-    background-color: var(--text-silver);
-    margin: 0 20px;
-    align-self: center;
-    transform: translateY(-10px);
-    opacity: 0.5;
 }
 
 .search-label {

@@ -70,10 +70,28 @@
                     </div>
 
                     <div class="controls-left-stack">
-                        <button class="btn" id="time-btn">Time Mode</button>
-                        <button class="btn" id="vu-btn">VU Meter</button>
+                        <div class="left-buttons-grid">
+                            <span class="search-label" style="grid-column:1/-1">SEARCH</span>
+                            <button class="btn" id="rew-btn">◀◀</button>
+                            <button class="btn" id="fwd-btn">▶▶</button>
+                            <button class="btn" id="minus-10-btn">- 10s</button>
+                            <button class="btn" id="plus-10-btn">+ 10s</button>
+                            <button class="btn" id="ab-btn">A - B</button>
+                            <button class="btn" id="peak-btn">Peak</button>
+                            <button class="btn" id="random-btn">Random</button>
+                            <button class="btn" id="repeat-btn">Repeat</button>
+                            <button class="btn" id="time-btn">Time Mode</button>
+                            <button class="btn" id="vu-btn">VU Meter</button>
+                            <button class="btn" id="vu-down-btn"
+                                onmouseenter="showVUSense()"
+                                onmouseleave="startVUTimeout()"
+                                onclick="adjustVUSense(-0.2)">VU -</button>
+                            <button class="btn" id="vu-up-btn"
+                                onmouseenter="showVUSense()"
+                                onmouseleave="startVUTimeout()"
+                                onclick="adjustVUSense(0.2)">VU +</button>
+                        </div>
                     </div>
-
                     <section class="display-panel">
                         <div class="vfd-main-row">
                             <div class="vfd-col-track">
@@ -151,21 +169,9 @@
                     </section>
 
                     <div class="controls-right-stack">
-                        <div class="right-buttons-grid">
-                            <span class="search-label">SEARCH</span>
-                            <button class="btn" id="rew-btn">◀◀</button>
-                            <button class="btn" id="fwd-btn">▶▶</button>
-                            <button class="btn" id="minus-10-btn">- 10s</button>
-                            <button class="btn" id="plus-10-btn">+ 10s</button>
-                            <button class="btn" id="random-btn">Random</button>
-                            <button class="btn" id="repeat-btn">Repeat</button>
-                            <button class="btn" id="ab-btn">A - B</button>
-                            <button class="btn" id="peak-btn">Peak</button>
-                        </div>
                         <div class="volume-controls">
                             <span class="volume-label">VOLUME</span>
                             <div class="knob-container">
-                                <!-- Un seul bouton qui gère les deux actions -->
                                 <div class="volume-knob" id="volume-knob"
                                     onmousedown="handleKnobMouseDown(event)"
                                     onmouseup="stopKnobInterval()"
@@ -173,8 +179,27 @@
                                     <div class="knob-indicator"></div>
                                 </div>
                             </div>
+                            <div class="tone-knobs-row">
+                                <div class="tone-knob-group">
+                                    <span class="tone-knob-label">BASS</span>
+                                    <div class="tone-knob" id="bass-knob"
+                                        onmousedown="handleToneKnobMouseDown(event,'bass')"
+                                        onmouseup="stopToneKnobInterval()"
+                                        onmouseleave="stopToneKnobInterval()">
+                                        <div class="knob-indicator"></div>
+                                    </div>
+                                </div>
+                                <div class="tone-knob-group">
+                                    <span class="tone-knob-label">TREBLE</span>
+                                    <div class="tone-knob" id="treble-knob"
+                                        onmousedown="handleToneKnobMouseDown(event,'treble')"
+                                        onmouseup="stopToneKnobInterval()"
+                                        onmouseleave="stopToneKnobInterval()">
+                                        <div class="knob-indicator"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -229,61 +254,6 @@
                 </div>
             </div>
 
-            <div class="controls-and-hatch-section">
-                <div class="tone-group-wrapper">
-                    <div class="tone-hatch-frame" onclick="toggleToneHatch()">
-                        <div id="tone-hatch-block" class="hatch-closed">
-                            <span class="hatch-open-label">PUSH OPEN</span>
-                            <div class="hatch-texture"></div>
-                            <span class="hatch-label"></span>
-                        </div>
-                        <div class="tone-controls-row">
-                            <div class="tone-group">
-                                <div class="btn-group">
-                                    <button class="btn btn-tone"
-                                        onmouseenter="showToneDisplay('BASS', bassLevel)"
-                                        onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustBass(-1)">Bass
-                                        -</button>
-                                    <button class="btn btn-tone"
-                                        onmouseenter="showToneDisplay('BASS', bassLevel)"
-                                        onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustBass(1)">Bass
-                                        +</button>
-                                    <button class="btn btn-tone"
-                                        id="default-tone-btn"
-                                        onclick="event.stopPropagation(); resetToneDefault()"
-                                        style="margin-left: 2px; margin-right: 2px;">RESET</button>
-                                    <button class="btn btn-tone"
-                                        onmouseenter="showToneDisplay('TREBLE', trebleLevel)"
-                                        onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustTreble(-1)">Treble
-                                        -</button>
-                                    <button class="btn btn-tone"
-                                        onmouseenter="showToneDisplay('TREBLE', trebleLevel)"
-                                        onmouseleave="startToneTimeout()"
-                                        onclick="event.stopPropagation(); adjustTreble(1)">Treble
-                                        +</button>
-                                </div>
-                                <span class="vertical-separator"></span>
-                                <div class="btn-group">
-                                    <button class="btn btn-tone"
-                                        id="vu-down-btn"
-                                        onmouseenter="showVUSense()"
-                                        onmouseleave="startVUTimeout()"
-                                        onclick="event.stopPropagation(); adjustVUSense(-0.2)">VU
-                                        -</button>
-                                    <button class="btn btn-tone" id="vu-up-btn"
-                                        onmouseenter="showVUSense()"
-                                        onmouseleave="startVUTimeout()"
-                                        onclick="event.stopPropagation(); adjustVUSense(0.2)">VU
-                                        +</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
         <div id="power-modal" class="custom-modal">
             <div class="modal-content power-alert">

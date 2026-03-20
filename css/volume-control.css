@@ -62,3 +62,56 @@
     transform: translateX(-50%);
     box-shadow: 0 0 5px var(--vfd-blue);
 }
+/* --- Tone knobs (Bass / Treble) --- */
+.tone-knobs-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.tone-knob-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.tone-knob-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: var(--text-silver);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.tone-knob {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #161616, #333333, #222, #333333, #161616);
+    border: 2px solid #111;
+    box-shadow:
+        3px 3px 10px #000,
+        inset 2px 2px 4px rgba(255,255,255,0.1);
+    position: relative;
+    cursor: pointer;
+    transform-origin: center center;
+    transition: transform 0.1s ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tone-knob .knob-indicator {
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background: var(--vfd-blue);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px var(--vfd-blue);
+}
