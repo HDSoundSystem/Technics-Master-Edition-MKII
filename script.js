@@ -5,11 +5,11 @@ let currentArt = "assets/img/Technics_cover.png", currentMeta = "Technics - Mast
 let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
 let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
-let audioCtx, analyzer, dataArray, searchInterval = null;
+let audioCtx, analyzerL, analyzerR, dataArrayL, dataArrayR, searchInterval = null;
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
-let vuMultiplier = 1.0;
+let vuMultiplier = 1.2;
 let bassFilter, trebleFilter;
 let bassLevel = 0;
 let trebleLevel = 0;
@@ -65,45 +65,28 @@ function hideVolumeDisplay() {
     updateTimeDisplay();
 }
 
-const volUp = document.getElementById('vol-up-btn');
-const volDown = document.getElementById('vol-down-btn');
-const muteBtn = document.getElementById('mute-btn');
-
-if (volUp && volDown) {
-    [volUp, volDown].forEach(btn => {
-        btn.onmouseenter = showVolumeDisplay;
-        btn.onmouseleave = () => {
-            stopVolRepeat();
-            hideVolumeDisplay();
-        };
-    });
-
-    volUp.onmousedown = () => startVolRepeat(1);
-    volUp.onmouseup = stopVolRepeat;
-    volDown.onmousedown = () => startVolRepeat(-1);
-    volDown.onmouseup = stopVolRepeat;
-}
-
-function startVolRepeat(dir) {
-    stopVolRepeat();
-    isMuted = false;
-    const adjust = () => {
-        let step = 0.01;
-        let newVol = dir === 1 ? audio.volume + step : audio.volume - step;
-        audio.volume = Math.max(0, Math.min(1, Math.round(newVol * 100) / 100));
+function peekKnobDisplay(type) {
+    if (toneKnobInterval || toneKnobDelayTimeout) return;
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    volDisplayTimeout = null;
+    if (type === 'volume') {
         showVolumeDisplay();
-    };
-    adjust();
-    volRepeatInterval = setInterval(adjust, 300);
-}
-
-function stopVolRepeat() {
-    if (volRepeatInterval) {
-        clearInterval(volRepeatInterval);
-        volRepeatInterval = null;
+    } else if (type === 'bass') {
+        showToneDisplay('BASS', bassLevel, true);
+    } else if (type === 'treble') {
+        showToneDisplay('TREBLE', trebleLevel, true);
+    } else if (type === 'balance') {
+        showBalanceDisplay();
     }
 }
 
+function startKnobPeekTimeout() {
+    if (activeToneKnobType) return;
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    volDisplayTimeout = setTimeout(hideVolumeDisplay, 800);
+}
+
+const muteBtn = document.getElementById('mute-btn');
 if (muteBtn) {
     muteBtn.onclick = () => {
         if (!isMuted) {
@@ -172,16 +155,19 @@ document.getElementById('peak-btn').onclick = async () => {
     for (let i = 0; i < 50; i++) {
         audio.currentTime = i * step;
         await new Promise(r => setTimeout(r, 40));
-        if (analyzer) {
-            analyzer.getByteFrequencyData(dataArray);
-            let currentMax = Math.max(...dataArray);
+        if (analyzerL && analyzerR) {
+            analyzerL.getFloatTimeDomainData(dataArrayL);
+            analyzerR.getFloatTimeDomainData(dataArrayR);
+            let sumL = 0, sumR = 0;
+            for (let j = 0; j < dataArrayL.length; j++) { sumL += dataArrayL[j] * dataArrayL[j]; sumR += dataArrayR[j] * dataArrayR[j]; }
+            let currentMax = Math.sqrt((sumL + sumR) / (2 * dataArrayL.length));
             if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
         }
     }
     audio.currentTime = peakTime;
     document.getElementById('main-time-display').classList.remove('vfd-input-blink');
     timeLabel.innerText = "PEAK FOUND";
-    const simulatedVal = Math.floor((maxVal / 255) * 40);
+    const simulatedVal = Math.floor(Math.min(1, maxVal * 6) * 40);
     ['meter-L', 'meter-R'].forEach(id => {
         const el = document.getElementById(id);
         for (let i = 0; i < simulatedVal; i++) {
@@ -271,7 +257,7 @@ function updateTimeDisplay() {
     if (isDisplayLocked) return;
     const timeLabel = document.getElementById('time-label');
     const mainTimeDisplay = document.getElementById('main-time-display');
-    if (["VOLUME", "MUTE", "VU SENSE", "BASS", "TREBLE"].includes(timeLabel.innerText) || isPeakSearching) return;
+    if (["VOLUME", "MUTE", "VU SENSE", "BASS", "TREBLE", "BALANCE"].includes(timeLabel.innerText) || isPeakSearching) return;
 
     let d = timeMode === 0 ? audio.currentTime : (audio.duration || 0) - audio.currentTime;
     const mins = Math.floor(d / 60).toString().padStart(2, '0');
@@ -421,12 +407,17 @@ function openPlaylist() {
 }
 
 document.getElementById('file-input').onchange = (e) => {
-    playlist = Array.from(e.target.files);
-    if (playlist.length) {
-        document.getElementById('tray-front').classList.remove('open');
-        loadTrack(0);
-        updateGrid();
-    }
+    const newFiles = Array.from(e.target.files);
+    e.target.value = '';
+    if (!newFiles.length) return;
+    const startIndex = playlist.length;
+    playlist = playlist.concat(newFiles);
+    // Ferme le tiroir automatiquement
+    const tray = document.getElementById('tray-front');
+    tray.classList.remove('open');
+    tray.closest('.tray-outer-slot').classList.remove('tray-open');
+    loadTrack(startIndex === 0 ? 0 : startIndex);
+    updateGrid();
 };
 
 document.getElementById('next-btn').onclick = () => {
@@ -439,7 +430,21 @@ document.getElementById('prev-btn').onclick = () => {
     loadTrack(currentIndex - 1);
 };
 
-document.getElementById('eject-btn').onclick = () => document.getElementById('tray-front').classList.toggle('open');
+document.getElementById('eject-btn').onclick = () => {
+    const tray = document.getElementById('tray-front');
+    const slot = tray.closest('.tray-outer-slot');
+    const isOpen = tray.classList.contains('open');
+    if (!isOpen) {
+        // Ouvre le tiroir puis déclenche le sélecteur de fichiers
+        tray.classList.add('open');
+        slot.classList.add('tray-open');
+        setTimeout(() => document.getElementById('file-input').click(), 600);
+    } else {
+        // Fermeture manuelle
+        tray.classList.remove('open');
+        slot.classList.remove('tray-open');
+    }
+};
 
 document.getElementById('random-btn').onclick = () => {
     isRandom = !isRandom;
@@ -466,6 +471,7 @@ function openArt() {
 
 function setupAudio() {
     if (audioCtx && audioCtx.state === "suspended") { audioCtx.resume(); return; }
+    if (audioCtx && audioCtx.state === "closed") { isAudioConnected = false; }
     if (isAudioConnected) return;
 
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -481,14 +487,31 @@ function setupAudio() {
     trebleFilter.frequency.value = 3000;
     trebleFilter.gain.value = trebleLevel;
 
-    analyzer = audioCtx.createAnalyser();
-    analyzer.fftSize = 64;
-    dataArray = new Uint8Array(analyzer.frequencyBinCount);
+    const splitter = audioCtx.createChannelSplitter(2);
+    const merger = audioCtx.createChannelMerger(2);
+
+    analyzerL = audioCtx.createAnalyser();
+    analyzerL.fftSize = 256;
+    dataArrayL = new Float32Array(analyzerL.fftSize);
+
+    analyzerR = audioCtx.createAnalyser();
+    analyzerR.fftSize = 256;
+    dataArrayR = new Float32Array(analyzerR.fftSize);
 
     src.connect(bassFilter);
     bassFilter.connect(trebleFilter);
-    trebleFilter.connect(analyzer);
-    analyzer.connect(audioCtx.destination);
+
+    pannerNode = audioCtx.createStereoPanner();
+    pannerNode.pan.value = balanceLevel;
+    trebleFilter.connect(pannerNode);
+    pannerNode.connect(splitter);
+
+    splitter.connect(analyzerL, 0);
+    splitter.connect(analyzerR, 1);
+
+    splitter.connect(merger, 0, 0);
+    splitter.connect(merger, 1, 1);
+    merger.connect(audioCtx.destination);
 
     isAudioConnected = true;
     renderVU();
@@ -496,13 +519,24 @@ function setupAudio() {
 
 function renderVU() {
     requestAnimationFrame(renderVU);
-    if (!analyzer || !isVUOn || isPeakSearching) return;
-    analyzer.getByteFrequencyData(dataArray);
-    ['meter-L', 'meter-R'].forEach((id, idx) => {
+    if (!analyzerL || !analyzerR || !isVUOn || isPeakSearching) return;
+
+    analyzerL.getFloatTimeDomainData(dataArrayL);
+    analyzerR.getFloatTimeDomainData(dataArrayR);
+
+    function rms(arr) {
+        let sum = 0;
+        for (let i = 0; i < arr.length; i++) sum += arr[i] * arr[i];
+        return Math.sqrt(sum / arr.length);
+    }
+
+    const rmsL = rms(dataArrayL);
+    const rmsR = rms(dataArrayR);
+
+    [['meter-L', rmsL], ['meter-R', rmsR]].forEach(([id, level]) => {
         const el = document.getElementById(id);
         if (!el) return;
-        let rawVal = dataArray[idx + 2] * vuMultiplier;
-        const val = Math.floor((rawVal / 255) * 40);
+        const val = Math.floor(Math.min(1, level * vuMultiplier * 3) * 40);
         for (let i = 0; i < 40; i++) {
             if (i < val) {
                 if (i >= 30) el.children[i].className = 'meter-segment on-red';
@@ -548,14 +582,6 @@ function startVUTimeout() {
     volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
 }
 
-function toggleVUHatch() {
-    const hatch = document.getElementById('vu-hatch-block');
-    if (hatch) {
-        hatch.classList.toggle('hatch-open');
-        hatch.classList.toggle('hatch-closed');
-    }
-}
-
 function adjustBass(change) {
     bassLevel = Math.max(-10, Math.min(10, bassLevel + change));
     if (bassFilter) bassFilter.gain.setTargetAtTime(bassLevel, audioCtx.currentTime, 0.01);
@@ -568,7 +594,7 @@ function adjustTreble(change) {
     showToneDisplay("TREBLE", trebleLevel);
 }
 
-function showToneDisplay(label, value) {
+function showToneDisplay(label, value, noTimeout = false) {
     if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
     const timeLabel = document.getElementById('time-label');
     const timeSep = document.getElementById('time-sep');
@@ -580,12 +606,7 @@ function showToneDisplay(label, value) {
     document.getElementById('m-d2').innerText = " ";
     document.getElementById('s-d1').innerText = valStr[0];
     document.getElementById('s-d2').innerText = valStr[1];
-    volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
-}
-
-function toggleToneHatch() {
-    const hatch = document.getElementById('tone-hatch-block');
-    if (hatch) hatch.classList.toggle('hatch-open');
+    if (!noTimeout) volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
 }
 
 function checkLock(e) {
@@ -599,34 +620,6 @@ function checkLock(e) {
         return true;
     }
     return false;
-}
-
-
-
-function resetToneDefault() {
-    bassLevel = 0;
-    trebleLevel = 0;
-    if (bassFilter) bassFilter.gain.value = 0;
-    if (trebleFilter) trebleFilter.gain.value = 0;
-
-    isDisplayLocked = true;
-    const timeLabel = document.getElementById('time-label');
-    const timeSep = document.getElementById('time-sep');
-
-    timeLabel.innerText = "TONE RESET";
-    timeSep.style.opacity = "0";
-
-    document.getElementById('m-d1').innerText = " ";
-    document.getElementById('m-d2').innerText = " ";
-    document.getElementById('s-d1').innerText = " ";
-    document.getElementById('s-d2').innerText = " ";
-
-    setTimeout(() => {
-        isDisplayLocked = false;
-        timeLabel.innerText = (timeMode === 0) ? "Min : Sec" : "- Min : Sec";
-        timeSep.style.opacity = "1";
-        updateTimeDisplay();
-    }, 1500);
 }
 
 function adjustVolume(change) {
@@ -695,3 +688,90 @@ function rotateKnob(deg) {
     }
 }
 
+// --- Tone knobs (Bass / Treble / Balance) ---
+let toneKnobInterval = null;
+let toneKnobDelayTimeout = null;
+let bassRotation = 0;
+let trebleRotation = 0;
+let balanceRotation = 0;
+let balanceLevel = 0; // -1 (full left) → 0 (center) → 1 (full right)
+let pannerNode = null;
+
+function getOrCreatePanner() {
+    return pannerNode;
+}
+
+function adjustBalance(change) {
+    balanceLevel = Math.max(-1, Math.min(1, Math.round((balanceLevel + change * 0.1) * 100) / 100));
+    const panner = getOrCreatePanner();
+    if (panner) panner.pan.setTargetAtTime(balanceLevel, audioCtx.currentTime, 0.01);
+    showBalanceDisplay();
+}
+
+function showBalanceDisplay() {
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    const timeLabel = document.getElementById('time-label');
+    const timeSep = document.getElementById('time-sep');
+    timeLabel.innerText = 'BALANCE';
+    timeSep.style.opacity = '0';
+    const side = balanceLevel < -0.01 ? 'L' : balanceLevel > 0.01 ? 'R' : 'C';
+    const val = Math.round(Math.abs(balanceLevel) * 10).toString().padStart(2, '0');
+    document.getElementById('m-d1').innerText = side;
+    document.getElementById('m-d2').innerText = ' ';
+    document.getElementById('s-d1').innerText = val[0];
+    document.getElementById('s-d2').innerText = val[1];
+    // Le timer est lancé uniquement depuis stopToneKnobInterval quand c'est balance
+}
+
+let activeToneKnobType = null;
+
+function handleToneKnobMouseDown(event, type) {
+    const knob = event.currentTarget;
+    const rect = knob.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const direction = clickX < rect.width / 2 ? -1 : 1;
+    activeToneKnobType = type;
+
+    // Annule tout timer d'effacement pendant l'interaction
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+
+    applyToneKnobAction(direction, type);
+
+    toneKnobDelayTimeout = setTimeout(() => {
+        toneKnobInterval = setInterval(() => {
+            applyToneKnobAction(direction, type);
+        }, 80);
+    }, 300);
+}
+
+function applyToneKnobAction(direction, type) {
+    if (type === 'bass') {
+        adjustBass(direction);
+        bassRotation = Math.max(-150, Math.min(150, bassRotation + direction * 15));
+        const el = document.getElementById('bass-knob');
+        if (el) el.style.transform = `rotate(${bassRotation}deg)`;
+    } else if (type === 'treble') {
+        adjustTreble(direction);
+        trebleRotation = Math.max(-150, Math.min(150, trebleRotation + direction * 15));
+        const el = document.getElementById('treble-knob');
+        if (el) el.style.transform = `rotate(${trebleRotation}deg)`;
+    } else if (type === 'balance') {
+        adjustBalance(direction);
+        balanceRotation = Math.max(-150, Math.min(150, balanceRotation + direction * 15));
+        const el = document.getElementById('balance-knob');
+        if (el) el.style.transform = `rotate(${balanceRotation}deg)`;
+    }
+}
+
+function stopToneKnobInterval() {
+    if (toneKnobDelayTimeout) clearTimeout(toneKnobDelayTimeout);
+    if (toneKnobInterval) clearInterval(toneKnobInterval);
+    toneKnobInterval = null;
+    toneKnobDelayTimeout = null;
+    // Lance le timer d'effacement seulement au relâchement
+    if (activeToneKnobType === 'balance') {
+        if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+        volDisplayTimeout = setTimeout(hideVolumeDisplay, 2500);
+    }
+    activeToneKnobType = null;
+}
