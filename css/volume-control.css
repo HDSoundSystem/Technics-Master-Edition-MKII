@@ -29,26 +29,27 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    pointer-events: none;
 }
 
 .volume-knob {
     width: 190px;
     height: 190px;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, #161616, #333333, #222, #333333, #161616); /* Effet métal brossé */
+    background: conic-gradient(from 0deg, #161616, #333333, #222, #333333, #161616);
     border: 2px solid #111;
     box-shadow: 
         5px 5px 15px #000,
         inset 2px 2px 5px rgba(255,255,255,0.1);
     position: relative;
     cursor: pointer;
-    transition: transform 0.2s ease;
     margin-top: -130px;
-    transition: transform 0.1s ease-out; /* Plus réactif pour un bouton */
+    transition: transform 0.1s ease-out;
     transform-origin: center center;
     display: flex;
     justify-content: center;
     align-items: center;
+    pointer-events: all;
 }
 /* Le petit point indicateur sur le bouton */
 .knob-indicator {

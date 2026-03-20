@@ -57,9 +57,7 @@
                         style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
                         <input type="file" id="file-input" multiple
                             style="display:none">
-                        <label for="file-input"
-                            style="color:#a0a0a0; cursor:pointer; font-weight:bold; letter-spacing:3px;">-
-                            SELECT TRACKS -</label>
+                        
                     </div>
                 </div>
 
@@ -173,9 +171,10 @@
                             <span class="volume-label">VOLUME</span>
                             <div class="knob-container">
                                 <div class="volume-knob" id="volume-knob"
+                                    onmouseenter="peekKnobDisplay('volume')"
                                     onmousedown="handleKnobMouseDown(event)"
                                     onmouseup="stopKnobInterval()"
-                                    onmouseleave="stopKnobInterval()">
+                                    onmouseleave="stopKnobInterval(); startKnobPeekTimeout()">
                                     <div class="knob-indicator"></div>
                                 </div>
                             </div>
@@ -183,18 +182,30 @@
                                 <div class="tone-knob-group">
                                     <span class="tone-knob-label">BASS</span>
                                     <div class="tone-knob" id="bass-knob"
+                                        onmouseenter="peekKnobDisplay('bass')"
                                         onmousedown="handleToneKnobMouseDown(event,'bass')"
                                         onmouseup="stopToneKnobInterval()"
-                                        onmouseleave="stopToneKnobInterval()">
+                                        onmouseleave="stopToneKnobInterval(); startKnobPeekTimeout()">
                                         <div class="knob-indicator"></div>
                                     </div>
                                 </div>
                                 <div class="tone-knob-group">
                                     <span class="tone-knob-label">TREBLE</span>
                                     <div class="tone-knob" id="treble-knob"
+                                        onmouseenter="peekKnobDisplay('treble')"
                                         onmousedown="handleToneKnobMouseDown(event,'treble')"
                                         onmouseup="stopToneKnobInterval()"
-                                        onmouseleave="stopToneKnobInterval()">
+                                        onmouseleave="stopToneKnobInterval(); startKnobPeekTimeout()">
+                                        <div class="knob-indicator"></div>
+                                    </div>
+                                </div>
+                                <div class="tone-knob-group">
+                                    <span class="tone-knob-label">BALANCE</span>
+                                    <div class="tone-knob" id="balance-knob"
+                                        onmouseenter="peekKnobDisplay('balance')"
+                                        onmousedown="handleToneKnobMouseDown(event,'balance')"
+                                        onmouseup="stopToneKnobInterval()"
+                                        onmouseleave="stopToneKnobInterval(); startKnobPeekTimeout()">
                                         <div class="knob-indicator"></div>
                                     </div>
                                 </div>
