@@ -63,7 +63,6 @@ body {
     width: 880px;
     height: 75px;
     background: none;
-    margin-bottom: 35px;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -71,11 +70,6 @@ body {
     align-items: center;
     margin-top: -50px;
     margin-bottom: 20px;
-    transition: overflow 0s 0.5s; /* bascule overflow après que l'animation commence */
-}
-
-.tray-outer-slot.tray-open {
-    overflow: visible;
 }
 
 .tray-mechanism {
@@ -91,13 +85,11 @@ body {
     border: 1px solid #000;
     box-sizing: border-box;
     border-top-color: #333;
-    position: relative;
 }
 
 /* On s'assure que l'animation de descente est toujours là */
 .tray-mechanism.open {
     transform: translateY(70px);
-    z-index: 0; /* label devient cliquable */
 }
 
 .mash-logo-tray {

@@ -413,9 +413,7 @@ document.getElementById('file-input').onchange = (e) => {
     const startIndex = playlist.length;
     playlist = playlist.concat(newFiles);
     // Ferme le tiroir automatiquement
-    const tray = document.getElementById('tray-front');
-    tray.classList.remove('open');
-    tray.closest('.tray-outer-slot').classList.remove('tray-open');
+    document.getElementById('tray-front').classList.remove('open');
     loadTrack(startIndex === 0 ? 0 : startIndex);
     updateGrid();
 };
@@ -432,17 +430,22 @@ document.getElementById('prev-btn').onclick = () => {
 
 document.getElementById('eject-btn').onclick = () => {
     const tray = document.getElementById('tray-front');
-    const slot = tray.closest('.tray-outer-slot');
     const isOpen = tray.classList.contains('open');
     if (!isOpen) {
-        // Ouvre le tiroir puis déclenche le sélecteur de fichiers
         tray.classList.add('open');
-        slot.classList.add('tray-open');
-        setTimeout(() => document.getElementById('file-input').click(), 600);
+        setTimeout(() => {
+            document.getElementById('file-input').click();
+            // Détecte le retour de focus (annulation ou sélection)
+            const onFocus = () => {
+                setTimeout(() => {
+                    document.getElementById('tray-front').classList.remove('open');
+                }, 300);
+                window.removeEventListener('focus', onFocus);
+            };
+            window.addEventListener('focus', onFocus);
+        }, 600);
     } else {
-        // Fermeture manuelle
         tray.classList.remove('open');
-        slot.classList.remove('tray-open');
     }
 };
 
