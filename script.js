@@ -9,7 +9,7 @@ let audioCtx, analyzerL, analyzerR, dataArrayL, dataArrayR, searchInterval = nul
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
-let vuMultiplier = 1.2;
+let vuMultiplier = 1.0;
 let bassFilter, trebleFilter;
 let bassLevel = 0;
 let trebleLevel = 0;
@@ -536,7 +536,7 @@ function renderVU() {
     [['meter-L', rmsL], ['meter-R', rmsR]].forEach(([id, level]) => {
         const el = document.getElementById(id);
         if (!el) return;
-        const val = Math.floor(Math.min(1, level * vuMultiplier * 3) * 40);
+        const val = Math.floor(Math.min(1, level * vuMultiplier * 6) * 40);
         for (let i = 0; i < 40; i++) {
             if (i < val) {
                 if (i >= 30) el.children[i].className = 'meter-segment on-red';
