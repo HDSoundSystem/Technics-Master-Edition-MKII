@@ -123,16 +123,14 @@ function startSearch(dir) {
     if (isABActive() || checkLock()) return;
     if (!playlist.length || isPeakSearching) return;
 
-    if (dir > 0) {
-        audio.playbackRate = 4.0;
-        if (audio.paused) audio.play();
-    } else {
-        audio.muted = true;
-        searchInterval = setInterval(() => {
-            audio.currentTime = Math.max(0, audio.currentTime - 2);
-            updateTimeDisplay();
-        }, 100);
-    }
+    if (audio.paused) audio.play();
+
+    searchInterval = setInterval(() => {
+        const step = dir > 0 ? 0.4 : -0.4;
+        audio.currentTime = Math.min(audio.duration, Math.max(0, audio.currentTime + step));
+        updateTimeDisplay();
+        if (audio.currentTime <= 0 || audio.currentTime >= audio.duration) stopSearch();
+    }, 30);
 }
 
 function stopSearch() {
@@ -140,7 +138,6 @@ function stopSearch() {
     if (searchInterval) {
         clearInterval(searchInterval);
         searchInterval = null;
-        audio.muted = false;
     }
 }
 
