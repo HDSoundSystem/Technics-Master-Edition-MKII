@@ -145,42 +145,84 @@ document.getElementById('minus-10-btn').onclick = () => {
 
 document.getElementById('peak-btn').onclick = async () => {
     if (!playlist.length || isPeakSearching) return;
-    isPeakSearching = true; audio.pause();
+    isPeakSearching = true;
+    audio.pause();
+
     const timeLabel = document.getElementById('time-label');
+    const timeSep = document.getElementById('time-sep');
     const originalLabel = timeLabel.innerText;
-    timeLabel.innerText = "PEAK SEARCH";
+    timeLabel.innerText = 'PEAK SEARCH';
+    timeSep.style.opacity = '0';
     document.getElementById('main-time-display').classList.add('vfd-input-blink');
-    let maxVal = 0, peakTime = 0;
-    const step = audio.duration / 50;
-    for (let i = 0; i < 50; i++) {
-        audio.currentTime = i * step;
-        await new Promise(r => setTimeout(r, 40));
-        if (analyzerL && analyzerR) {
-            analyzerL.getFloatTimeDomainData(dataArrayL);
-            analyzerR.getFloatTimeDomainData(dataArrayR);
-            let sumL = 0, sumR = 0;
-            for (let j = 0; j < dataArrayL.length; j++) { sumL += dataArrayL[j] * dataArrayL[j]; sumR += dataArrayR[j] * dataArrayR[j]; }
-            let currentMax = Math.sqrt((sumL + sumR) / (2 * dataArrayL.length));
-            if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
-        }
-    }
-    audio.currentTime = peakTime;
-    document.getElementById('main-time-display').classList.remove('vfd-input-blink');
-    timeLabel.innerText = "PEAK FOUND";
-    const simulatedVal = Math.floor(Math.min(1, maxVal * 6) * 40);
-    ['meter-L', 'meter-R'].forEach(id => {
-        const el = document.getElementById(id);
-        for (let i = 0; i < simulatedVal; i++) {
-            if (i >= 30) {
-                el.children[i].className = 'meter-segment on-red';
-            } else if (i >= 20) {
-                el.children[i].className = 'meter-segment on-orange';
-            } else {
-                el.children[i].className = 'meter-segment on-blue';
+
+    try {
+        // Lire le fichier source en ArrayBuffer
+        const file = playlist[currentIndex];
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Décoder via un contexte offline pour accéder aux samples bruts
+        const offlineCtx = new OfflineAudioContext(2, 1, 44100);
+        const audioBuffer = await offlineCtx.decodeAudioData(arrayBuffer);
+
+        const duration = audioBuffer.duration;
+        const sampleRate = audioBuffer.sampleRate;
+        const nChannels = audioBuffer.numberOfChannels;
+
+        // Diviser en 200 fenêtres, calculer le RMS de chaque fenêtre
+        const windowCount = 200;
+        const samplesPerWindow = Math.floor(audioBuffer.length / windowCount);
+        let maxRms = 0;
+        let peakWindow = 0;
+
+        for (let w = 0; w < windowCount; w++) {
+            let sum = 0, count = 0;
+            const start = w * samplesPerWindow;
+            const end = Math.min(start + samplesPerWindow, audioBuffer.length);
+            for (let ch = 0; ch < nChannels; ch++) {
+                const data = audioBuffer.getChannelData(ch);
+                for (let s = start; s < end; s++) {
+                    sum += data[s] * data[s];
+                    count++;
+                }
             }
+            const rms = Math.sqrt(sum / count);
+            if (rms > maxRms) { maxRms = rms; peakWindow = w; }
         }
-    });
-    setTimeout(() => { timeLabel.innerText = originalLabel; isPeakSearching = false; updateTimeDisplay(); }, 2000);
+
+        const peakTime = (peakWindow / windowCount) * duration;
+        audio.currentTime = peakTime;
+
+        document.getElementById('main-time-display').classList.remove('vfd-input-blink');
+        timeLabel.innerText = 'PEAK FOUND';
+
+        // Afficher le niveau sur les VU mètres
+        const simulatedVal = Math.floor(Math.min(1, maxRms * 4) * 40);
+        ['meter-L', 'meter-R'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            for (let i = 0; i < 40; i++) {
+                if (i < simulatedVal) {
+                    el.children[i].className = i >= 30 ? 'meter-segment on-red'
+                        : i >= 20 ? 'meter-segment on-orange'
+                        : 'meter-segment on-blue';
+                } else {
+                    el.children[i].className = 'meter-segment';
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error('Peak search error:', err);
+        document.getElementById('main-time-display').classList.remove('vfd-input-blink');
+        timeLabel.innerText = 'PEAK ERROR';
+    }
+
+    setTimeout(() => {
+        timeLabel.innerText = originalLabel;
+        timeSep.style.opacity = '1';
+        isPeakSearching = false;
+        updateTimeDisplay();
+    }, 2000);
 };
 
 document.getElementById('vu-btn').onclick = () => {
