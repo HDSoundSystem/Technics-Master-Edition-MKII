@@ -16,6 +16,7 @@ let trebleLevel = 0;
 let userPaused = false;
 let isABLocked = false;
 let isDisplayLocked = false;
+let currentRotation = 0;
 
 
 // CORRECTION 1 : Variable pour empêcher la double connexion audio
@@ -68,7 +69,7 @@ const volUp = document.getElementById('vol-up-btn');
 const volDown = document.getElementById('vol-down-btn');
 const muteBtn = document.getElementById('mute-btn');
 
-if(volUp && volDown) {
+if (volUp && volDown) {
     [volUp, volDown].forEach(btn => {
         btn.onmouseenter = showVolumeDisplay;
         btn.onmouseleave = () => {
@@ -103,7 +104,7 @@ function stopVolRepeat() {
     }
 }
 
-if(muteBtn) {
+if (muteBtn) {
     muteBtn.onclick = () => {
         if (!isMuted) {
             preMuteVolume = audio.volume;
@@ -122,16 +123,14 @@ function startSearch(dir) {
     if (isABActive() || checkLock()) return;
     if (!playlist.length || isPeakSearching) return;
 
-    if (dir > 0) {
-        audio.playbackRate = 4.0;
-        if (audio.paused) audio.play();
-    } else {
-        audio.muted = true;
-        searchInterval = setInterval(() => {
-            audio.currentTime = Math.max(0, audio.currentTime - 2);
-            updateTimeDisplay();
-        }, 100);
-    }
+    if (audio.paused) audio.play();
+
+    searchInterval = setInterval(() => {
+        const step = dir > 0 ? 0.4 : -0.4;
+        audio.currentTime = Math.min(audio.duration, Math.max(0, audio.currentTime + step));
+        updateTimeDisplay();
+        if (audio.currentTime <= 0 || audio.currentTime >= audio.duration) stopSearch();
+    }, 30);
 }
 
 function stopSearch() {
@@ -139,7 +138,6 @@ function stopSearch() {
     if (searchInterval) {
         clearInterval(searchInterval);
         searchInterval = null;
-        audio.muted = false;
     }
 }
 
@@ -174,7 +172,7 @@ document.getElementById('peak-btn').onclick = async () => {
     for (let i = 0; i < 50; i++) {
         audio.currentTime = i * step;
         await new Promise(r => setTimeout(r, 40));
-        if(analyzer) {
+        if (analyzer) {
             analyzer.getByteFrequencyData(dataArray);
             let currentMax = Math.max(...dataArray);
             if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
@@ -265,8 +263,8 @@ function updateDig(prefix, val) {
     const s = Math.floor(Math.abs(val)).toString().padStart(2, '0');
     const d1 = document.getElementById(`${prefix}-d1`);
     const d2 = document.getElementById(`${prefix}-d2`);
-    if(d1) d1.innerText = s[s.length - 2] || "0";
-    if(d2) d2.innerText = s[s.length - 1] || "0";
+    if (d1) d1.innerText = s[s.length - 2] || "0";
+    if (d2) d2.innerText = s[s.length - 1] || "0";
 }
 
 function updateTimeDisplay() {
@@ -502,7 +500,7 @@ function renderVU() {
     analyzer.getByteFrequencyData(dataArray);
     ['meter-L', 'meter-R'].forEach((id, idx) => {
         const el = document.getElementById(id);
-        if(!el) return;
+        if (!el) return;
         let rawVal = dataArray[idx + 2] * vuMultiplier;
         const val = Math.floor((rawVal / 255) * 40);
         for (let i = 0; i < 40; i++) {
@@ -519,7 +517,7 @@ function renderVU() {
 
 ['meter-L', 'meter-R'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) {
+    if (el) {
         for (let i = 0; i < 40; i++) el.appendChild(document.createElement('div')).className = 'meter-segment';
     }
 });
@@ -552,7 +550,7 @@ function startVUTimeout() {
 
 function toggleVUHatch() {
     const hatch = document.getElementById('vu-hatch-block');
-    if(hatch) {
+    if (hatch) {
         hatch.classList.toggle('hatch-open');
         hatch.classList.toggle('hatch-closed');
     }
@@ -587,13 +585,13 @@ function showToneDisplay(label, value) {
 
 function toggleToneHatch() {
     const hatch = document.getElementById('tone-hatch-block');
-    if(hatch) hatch.classList.toggle('hatch-open');
+    if (hatch) hatch.classList.toggle('hatch-open');
 }
 
 function checkLock(e) {
     if (isABLocked) {
         const lockIndicator = document.getElementById('vfd-ab-lock');
-        if(lockIndicator) {
+        if (lockIndicator) {
             lockIndicator.classList.add('vfd-input-blink');
             setTimeout(() => lockIndicator.classList.remove('vfd-input-blink'), 500);
         }
@@ -617,7 +615,7 @@ function resetToneDefault() {
 
     timeLabel.innerText = "TONE RESET";
     timeSep.style.opacity = "0";
-    
+
     document.getElementById('m-d1').innerText = " ";
     document.getElementById('m-d2').innerText = " ";
     document.getElementById('s-d1').innerText = " ";
@@ -629,5 +627,71 @@ function resetToneDefault() {
         timeSep.style.opacity = "1";
         updateTimeDisplay();
     }, 1500);
+}
+
+function adjustVolume(change) {
+    // On annule le mute si on touche au volume
+    isMuted = false;
+
+    // Calcul du nouveau volume (entre 0 et 1)
+    let newVol = audio.volume + change;
+    audio.volume = Math.max(0, Math.min(1, Math.round(newVol * 100) / 100));
+
+    // Mise à jour de l'affichage VFD (le texte bleu)
+    showVolumeDisplay();
+
+    // On cache l'affichage après 1.5 seconde d'inactivité
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
+}
+
+let knobInterval = null;
+let knobDelayTimeout = null;
+
+function handleKnobMouseDown(event) {
+    const knob = event.currentTarget;
+    const rect = knob.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const middle = rect.width / 2;
+    const direction = clickX < middle ? -1 : 1;
+
+    // 1. Action immédiate au clic
+    applyKnobAction(direction);
+
+    // 2. Attendre 300ms avant de commencer la répétition (comme un vrai bouton)
+    knobDelayTimeout = setTimeout(() => {
+        knobInterval = setInterval(() => {
+            applyKnobAction(direction);
+        }, 80); // Vitesse de défilement (80ms pour plus de fluidité)
+    }, 300);
+}
+
+function applyKnobAction(direction) {
+    // On utilise un pas de 0.01 pour la précision
+    const step = 0.01;
+    adjustVolume(direction * step);
+
+    // Rotation visuelle : 3 degrés par pas
+    rotateKnob(direction * 3);
+}
+
+function stopKnobInterval() {
+    // On nettoie le délai et l'intervalle
+    if (knobDelayTimeout) clearTimeout(knobDelayTimeout);
+    if (knobInterval) clearInterval(knobInterval);
+    knobInterval = null;
+    knobDelayTimeout = null;
+}
+
+function rotateKnob(deg) {
+    currentRotation += deg;
+    // Limites de rotation (Physique d'un vrai bouton Technics)
+    if (currentRotation < -150) currentRotation = -150;
+    if (currentRotation > 150) currentRotation = 150;
+
+    const knobEl = document.getElementById('volume-knob');
+    if (knobEl) {
+        knobEl.style.transform = `rotate(${currentRotation}deg)`;
+    }
 }
 

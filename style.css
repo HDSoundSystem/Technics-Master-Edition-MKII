@@ -1,21 +1,5 @@
-:root {
-    --bg-color: #000000;
-    --shadow-color : #ebebeb;
-    --deck-color: #1a1a1b;
-    --vfd-color: #dfdfdf;
-    --vfd-glow: #8a8a8a;
-    --vfd-blue-dim: #003a4d;
-    --vfd-off: #0a0a0a;
-    --vfd-red: #ff3333;
-    --text-silver: #a0a0a0;
-    --text-beige: #b6b69f;
-    --text-gold: #7a6a0c;
-    --text-brown: #9F7E69;
-    --text-white: #ffffff;
-    --ui-font: 'Segoe UI', Tahoma, sans-serif;
-    --digital-font: 'DS-Digital', sans-serif;
-    --brushed-metal: conic-gradient(from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg);
-}
+@import url('css/root.css');
+@import url('css/volume-control.css');
 
 body {
     background-color: var(--bg-color);
@@ -58,21 +42,6 @@ body {
     margin-right: -70px;
 }
 
-.main-logo {
-    height: 23px;
-    display: block;
-    margin-left: 0px;
-}
-
-.model-name {
-    font-size: 12px;
-    color: var(--text-silver);
-    letter-spacing: 3px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-right: 0px;
-}
-
 .central-display-section {
     width: 100%;
     display: flex;
@@ -105,7 +74,6 @@ body {
     margin-top: -50px;
     margin-bottom: 20px;
 }
-
 
 .tray-mechanism {
     width: 100%;
@@ -172,16 +140,12 @@ body {
     height: 50px;
 }
 
-
-.controls-left-stack .btn {
-    width: 100%;
-    height: 50px;
-}
-
 .transport-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 35px;
+    grid-template-columns: repeat(6, 1fr);
+    /* Passage à 6 colonnes */
+    gap: 15px;
+    /* Réduction de l'espace (était à 35px) pour gagner de la place */
     margin-top: 5px;
     margin-bottom: 0px;
     width: 880px;
@@ -348,15 +312,6 @@ body {
     box-shadow: 0 0 5px var(--vfd-red);
 }
 
-.main-interface {
-    display: grid;
-    grid-template-columns: 230px 880px 230px;
-    gap: 10px;
-    align-items: start;
-    margin: 0 auto;
-    width: fit-content;
-}
-
 .btn {
     background: linear-gradient(185deg, #2a2a2b, #151516);
     /* dégradé bouton */
@@ -426,15 +381,6 @@ body {
 }
 
 /* Taille du logo HR */
-.hr-logo-bottom {
-    position: absolute;
-    left: 50px;
-    bottom: 65px;
-    height: 40px;
-    opacity: 0.7;
-    pointer-events: none;
-    margin-bottom: -15px;
-}
 
 /* Modals */
 #art-modal, #playlist-modal {
@@ -593,20 +539,6 @@ body {
     animation: vfd-input-blink 1s infinite;
 }
 
-.invisible-link {
-    text-decoration: none;
-    /* Supprime le soulignement */
-    cursor: default;
-    /* Empêche la flèche de devenir une main */
-    outline: none;
-    /* Supprime le cadre bleu au clic */
-    display: inline-block;
-}
-
-.invisible-link img {
-    border: none;
-}
-
 .file-format {
     font-family: var(--ui-font);
     font-size: 10px;
@@ -627,7 +559,6 @@ body {
     /* Taille du texte */
     margin-bottom: 5px;
 }
-
 
 /* Ciblage spécifique de la rangée de transport (Play, Stop, Next, etc.) */
 .transport-grid .btn {
@@ -668,53 +599,6 @@ body {
     height: 50px;
 }
 
-.volume-controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    /* 3 colonnes pour les boutons */
-    grid-template-rows: auto auto;
-    /* 2 lignes : label + boutons */
-    gap: 10px;
-    width: 100%;
-    margin-top: 90px;
-}
-
-
-#vol-down-btn, #vol-up-btn, #mute-btn {
-    height: 50px;
-    width: 100%;
-}
-
-/* Remplace .volume-label par la classe que tu utilises pour le texte "VOLUME" */
-.volume-label {
-    display: block;
-    /* S'assure que l'élément peut être déplacé */
-    transform: translateY(30px);
-    /* Descend le mot de 15px vers le bas */
-}
-
-.label-tiny {
-    position: absolute;
-    top: -15px;
-    font-size: 9px;
-    color: #555;
-}
-
-.vu-sense-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
-    /* Espace sous le bloc volume */
-}
-
-.vu-controls-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
 /* On force la taille identique au volume */
 #vu-down-btn, #vu-up-btn {
     width: 90px;
@@ -725,11 +609,6 @@ body {
 }
 
 /* Style optionnel pour le label (comme tu as demandé précédemment) */
-.vu-sense-group .upper-label {
-    font-size: 10px;
-    letter-spacing: 1px;
-    /* background-color: #222; (Si tu veux un fond de couleur) */
-}
 
 #over-arrow {
     color: #220000;
@@ -743,7 +622,6 @@ body {
     text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
     /* Effet néon/VFD */
 }
-
 
 /* --- REFLET VERTICAL HAUT EN BAS --- */
 
@@ -795,7 +673,6 @@ body {
     text-align: center;
 }
 
-
 /* Modification des marges pour s'adapter à la nouvelle position */
 .tone-controls-row {
     display: flex;
@@ -839,20 +716,12 @@ body {
     gap: 10px;
 }
 
-
 .tone-group-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     /* Permet à la trappe de prendre toute la largeur disponible */
-}
-
-.display-and-controls {
-    width: 880px;
-    flex-shrink: 0;
-    overflow: visible;
-    position: relative;
 }
 
 .tone-hatch-frame {
@@ -883,8 +752,6 @@ body {
     will-change: transform;
 }
 
-
-
 #tone-hatch-block.hatch-open {
     transform: translateY(90px);
     /* Glisse vers le bas */
@@ -898,14 +765,6 @@ body {
     height: 100%;
     padding: 0 10px;
     gap: 8px;
-}
-
-.label-tiny {
-    font-size: 9px;
-    color: #555;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .hatch-label {
@@ -927,7 +786,6 @@ body {
     user-select: none;
     opacity: 0.9;
 }
-
 
 .hatch-open-label {
     position: absolute;
@@ -954,8 +812,6 @@ body {
     opacity: 0.9;
 }
 
-
-
 #default-tone-btn {
     width: 60px;
     height: 45px;
@@ -965,12 +821,6 @@ body {
 }
 
 /* Effet au survol ou quand le bouton est actif */
-.default-tone-btn:hover {
-    color: var(--text-white);
-    text-shadow: 0 0 5px var(--vfd-glow);
-}
-
-
 
 .btn i {
     font-size: 14px;
@@ -1004,8 +854,7 @@ body {
     opacity: 0.5;
 }
 
-
-.volume-label {
+.search-label {
     grid-column: 1 / -1;
     /* Occupe les 3 colonnes */
     grid-row: 1;
@@ -1015,7 +864,11 @@ body {
     color: var(--text-silver);
     letter-spacing: 1px;
     font-weight: bold;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+    display: block;
+    /* S'assure que l'élément peut être déplacé */
+    transform: translateY(10px);
+    /* Descend le mot de 15px vers le bas */
 }
 
 /* Échelle graduée en dB pour les VU meters */
@@ -1112,4 +965,17 @@ body {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 15px;
+}
+
+.transport-grid .btn, #mute-btn {
+    height: 60px;
+    width: 100%;
+    font-size: 14px;
+    /* Pour que l'icône soit aussi grande que celle de STOP */
+    padding: 0;
+}
+
+/* On s'assure que l'icône à l'intérieur suit la même règle de taille */
+#mute-btn i {
+    font-size: 18px;
 }
