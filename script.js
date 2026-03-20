@@ -5,7 +5,7 @@ let currentArt = "assets/img/Technics_cover.png", currentMeta = "Technics - Mast
 let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
 let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
-let audioCtx, analyzer, dataArray, searchInterval = null;
+let audioCtx, analyzerL, analyzerR, dataArrayL, dataArrayR, searchInterval = null;
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
@@ -172,16 +172,19 @@ document.getElementById('peak-btn').onclick = async () => {
     for (let i = 0; i < 50; i++) {
         audio.currentTime = i * step;
         await new Promise(r => setTimeout(r, 40));
-        if (analyzer) {
-            analyzer.getByteFrequencyData(dataArray);
-            let currentMax = Math.max(...dataArray);
+        if (analyzerL && analyzerR) {
+            analyzerL.getFloatTimeDomainData(dataArrayL);
+            analyzerR.getFloatTimeDomainData(dataArrayR);
+            let sumL = 0, sumR = 0;
+            for (let j = 0; j < dataArrayL.length; j++) { sumL += dataArrayL[j] * dataArrayL[j]; sumR += dataArrayR[j] * dataArrayR[j]; }
+            let currentMax = Math.sqrt((sumL + sumR) / (2 * dataArrayL.length));
             if (currentMax > maxVal) { maxVal = currentMax; peakTime = audio.currentTime; }
         }
     }
     audio.currentTime = peakTime;
     document.getElementById('main-time-display').classList.remove('vfd-input-blink');
     timeLabel.innerText = "PEAK FOUND";
-    const simulatedVal = Math.floor((maxVal / 255) * 40);
+    const simulatedVal = Math.floor(Math.min(1, maxVal * 6) * 40);
     ['meter-L', 'meter-R'].forEach(id => {
         const el = document.getElementById(id);
         for (let i = 0; i < simulatedVal; i++) {
@@ -481,14 +484,27 @@ function setupAudio() {
     trebleFilter.frequency.value = 3000;
     trebleFilter.gain.value = trebleLevel;
 
-    analyzer = audioCtx.createAnalyser();
-    analyzer.fftSize = 64;
-    dataArray = new Uint8Array(analyzer.frequencyBinCount);
+    const splitter = audioCtx.createChannelSplitter(2);
+    const merger = audioCtx.createChannelMerger(2);
+
+    analyzerL = audioCtx.createAnalyser();
+    analyzerL.fftSize = 256;
+    dataArrayL = new Float32Array(analyzerL.fftSize);
+
+    analyzerR = audioCtx.createAnalyser();
+    analyzerR.fftSize = 256;
+    dataArrayR = new Float32Array(analyzerR.fftSize);
 
     src.connect(bassFilter);
     bassFilter.connect(trebleFilter);
-    trebleFilter.connect(analyzer);
-    analyzer.connect(audioCtx.destination);
+    trebleFilter.connect(splitter);
+
+    splitter.connect(analyzerL, 0);
+    splitter.connect(analyzerR, 1);
+
+    splitter.connect(merger, 0, 0);
+    splitter.connect(merger, 1, 1);
+    merger.connect(audioCtx.destination);
 
     isAudioConnected = true;
     renderVU();
@@ -496,13 +512,24 @@ function setupAudio() {
 
 function renderVU() {
     requestAnimationFrame(renderVU);
-    if (!analyzer || !isVUOn || isPeakSearching) return;
-    analyzer.getByteFrequencyData(dataArray);
-    ['meter-L', 'meter-R'].forEach((id, idx) => {
+    if (!analyzerL || !analyzerR || !isVUOn || isPeakSearching) return;
+
+    analyzerL.getFloatTimeDomainData(dataArrayL);
+    analyzerR.getFloatTimeDomainData(dataArrayR);
+
+    function rms(arr) {
+        let sum = 0;
+        for (let i = 0; i < arr.length; i++) sum += arr[i] * arr[i];
+        return Math.sqrt(sum / arr.length);
+    }
+
+    const rmsL = rms(dataArrayL);
+    const rmsR = rms(dataArrayR);
+
+    [['meter-L', rmsL], ['meter-R', rmsR]].forEach(([id, level]) => {
         const el = document.getElementById(id);
         if (!el) return;
-        let rawVal = dataArray[idx + 2] * vuMultiplier;
-        const val = Math.floor((rawVal / 255) * 40);
+        const val = Math.floor(Math.min(1, level * vuMultiplier * 4) * 40);
         for (let i = 0; i < 40; i++) {
             if (i < val) {
                 if (i >= 30) el.children[i].className = 'meter-segment on-red';
