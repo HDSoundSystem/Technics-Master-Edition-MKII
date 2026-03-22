@@ -1,8 +1,6 @@
 .volume-label {
     grid-column: 1 / -1;
-    /* Occupe les 3 colonnes */
     grid-row: 1;
-    /* Première ligne */
     text-align: center;
     font-size: 10px;
     color: var(--text-silver);
@@ -19,7 +17,7 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-top: 20px; /* Ajusté pour laisser de la place au bouton */
+    margin-top: 20px;
 }
 
 .knob-container {
@@ -51,19 +49,7 @@
     align-items: center;
     pointer-events: all;
 }
-/* Le petit point indicateur sur le bouton */
-.knob-indicator {
-    position: absolute;
-    top: 15%;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    background: var(--vfd-blue);
-    border-radius: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 0 5px var(--vfd-blue);
-}
-/* --- Tone knobs (Bass / Treble) --- */
+
 .tone-knobs-row {
     display: flex;
     justify-content: center;
