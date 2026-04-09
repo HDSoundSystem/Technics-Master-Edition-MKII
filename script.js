@@ -9,7 +9,7 @@ let audioCtx, analyzerL, analyzerR, dataArrayL, dataArrayR, searchInterval = nul
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
-let vuMultiplier = 1.0;
+let vuMultiplier = 0.8;
 let bassFilter, trebleFilter;
 let bassLevel = 0;
 let trebleLevel = 0;
