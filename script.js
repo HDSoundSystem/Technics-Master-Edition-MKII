@@ -10,6 +10,10 @@ let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
 let vuMultiplier = 1.0;
+let vuSmoothedL = 0;
+let vuSmoothedR = 0;
+const VU_SMOOTHING_UP = 0.4;   // montée rapide
+const VU_SMOOTHING_DOWN = 0.05; // descente lente (inertie analogique)
 let bassFilter, trebleFilter;
 let bassLevel = 0;
 let trebleLevel = 0;
@@ -660,7 +664,15 @@ function renderVU() {
     const rmsL = rms(dataArrayL);
     const rmsR = rms(dataArrayR);
 
-    [['meter-L', rmsL], ['meter-R', rmsR]].forEach(([id, level]) => {
+    // Lissage analogique : montée rapide, descente lente
+    vuSmoothedL += (rmsL > vuSmoothedL)
+        ? (rmsL - vuSmoothedL) * VU_SMOOTHING_UP
+        : (rmsL - vuSmoothedL) * VU_SMOOTHING_DOWN;
+    vuSmoothedR += (rmsR > vuSmoothedR)
+        ? (rmsR - vuSmoothedR) * VU_SMOOTHING_UP
+        : (rmsR - vuSmoothedR) * VU_SMOOTHING_DOWN;
+
+    [['meter-L', vuSmoothedL], ['meter-R', vuSmoothedR]].forEach(([id, level]) => {
         const el = document.getElementById(id);
         if (!el) return;
         const val = Math.floor(Math.min(1, level * vuMultiplier * 6) * 40);
