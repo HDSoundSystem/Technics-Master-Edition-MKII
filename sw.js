@@ -9,6 +9,7 @@ const assetsToCache = [
     './img/HR_logo.png',
     './img/mash_logo_t.png',
     './img/Technics_cover.png',
+    './img/classAA_new.png',
 ];
 
 self.addEventListener('install', (event) => {
