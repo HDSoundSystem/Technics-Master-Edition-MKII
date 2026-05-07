@@ -3,6 +3,7 @@
 A vintage-inspired, high-fidelity web audio player that recreates the premium experience of classic Technics audio equipment with modern web technologies.
 
 <img width="1257" height="197" alt="Technics_cover" src="https://github.com/user-attachments/assets/4cbd644c-e987-4431-b7e1-9cbaeafd9f76" />
+--
 <img width="1901" height="777" alt="t1" src="https://github.com/user-attachments/assets/0cd37b13-95a7-4688-8f0f-9a148808887d" />
 
 ## Overview
